@@ -17,7 +17,8 @@ extension JSONDecoder {
     }
 }
 
-var indexURL = "https://api.podcastindex.org/api/1.0"
+let testAPI = "api.regtest.getalby.com"
+let prodAPI = "api.getalby.com"
 let routerDelegate = AlbyRouterDelegate()
 
 class AlbyRouterDelegate: NetworkRouterDelegate {
@@ -44,9 +45,32 @@ class AlbyRouterDelegate: NetworkRouterDelegate {
 //        request.addValue(apiKey, forHTTPHeaderField: "X-Auth-Key")
 //        request.addValue(hashString, forHTTPHeaderField: "Authorization")
 //        request.addValue(userAgent, forHTTPHeaderField: "User-Agent")
+        
+        
+//        request.addValue("application/json", forHTTPHeaderField: "Content-Type") // Doesn't need to be set here/ netweorking code sets this elsewhere
     }
     
     func shouldRetry(error: Error, attempts: Int) async throws -> Bool {
-        false // TODO: implement shouldRetry
+//        false // TODO: implement shouldRetry
+        
+        
+        func getNewToken() async throws -> Bool {
+//            shouldRefreshToken = true
+//            let newSession = try await AtProtoLexicons().refresh(attempts: attempts + 1)
+//            accessToken = newSession.accessJwt
+//            refreshToken = newSession.refreshJwt
+//            await delegate?.sessionUpdated(newSession)
+            
+            return true
+        }
+        
+        // TODO: verify this works!
+        if case .network(let networkError) = error as? AlbyError, case .statusCode(let statusCode, _) = networkError, let statusCode = statusCode?.rawValue, (400..<500).contains(statusCode), attempts == 1 {
+            return try await getNewToken()
+        } else if case .message(let message) = error as? AlbyError, message.code == AlbyErrorCode.generic.rawValue {
+            return try await getNewToken()
+        }
+        
+        return false
     }
 }

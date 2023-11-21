@@ -15,7 +15,7 @@ protocol NetworkRouterProtocol: AnyObject {
     func execute<T: Decodable>(_ route: Endpoint, attempts: Int) async throws -> T
 }
 
-enum NetworkError : Error {
+public enum NetworkError : Error, Sendable {
     case encodingFailed
     case missingURL
     case statusCode(_ statusCode: StatusCode?, data: Data)
@@ -67,10 +67,21 @@ class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
             return try decoder.decode(T.self, from: data)
         default:
             let statusCode = StatusCode(rawValue: httpResponse.statusCode)
-            let errorToThrow = NetworkError.statusCode(statusCode, data: data)
+            let statusNetworkError = AlbyError.network(NetworkError.statusCode(statusCode, data: data))
             
-            guard let delegate,
-                  try await delegate.shouldRetry(error: errorToThrow, attempts: attempts) else { throw errorToThrow }
+            guard let delegate else { throw statusNetworkError }
+            
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            
+            let errorToThrow: AlbyError
+            if let errorMessage = try? decoder.decode(ErrorMessage.self, from: data) {
+                errorToThrow = AlbyError.message(errorMessage)
+            } else {
+                errorToThrow = statusNetworkError
+            }
+            
+            guard try await delegate.shouldRetry(error: errorToThrow, attempts: attempts) else { throw errorToThrow }
             return try await execute(route, attempts: attempts + 1)
         }
     }
