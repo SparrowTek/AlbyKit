@@ -2,6 +2,8 @@ import Foundation
 
 extension Encodable {
     func toJSONData() throws -> Data {
-        try JSONEncoder().encode(self)
+        let encoder = JSONEncoder()
+        encoder.keyEncodingStrategy = .convertToSnakeCase
+        return try encoder.encode(self)
     }
 }
