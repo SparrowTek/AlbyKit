@@ -16,5 +16,7 @@ public final class AlbyKit {
 //    static var userAgent: String?
     
     public let accountService = AccountsService()
+    public let invoicesService = InvoicesService()
+    public let paymentsService = PaymentsService()
 }
 

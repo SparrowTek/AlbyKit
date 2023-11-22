@@ -18,4 +18,13 @@ public struct InvoiceHistoryUploadModel: Codable, Sendable {
     
     /// Items per page (Default 25)
     public var items: Int?
+    
+    public init(before: String? = nil, since: String? = nil, createdAtLt: Int? = nil, createdAtGt: Int? = nil, page: Int? = nil, items: Int? = nil) {
+        self.before = before
+        self.since = since
+        self.createdAtLt = createdAtLt
+        self.createdAtGt = createdAtGt
+        self.page = page
+        self.items = items
+    }
 }
