@@ -1,7 +1,7 @@
 import Foundation
 
-public struct InvoiceService {
-    private let router = NetworkRouter<InvoiceAPI>(decoder: .albyDecoder)
+public struct InvoicesService {
+    private let router = NetworkRouter<InvoicesAPI>(decoder: .albyDecoder)
     
     /// Create an invoice
     /// Scope needed: invoices:create
@@ -52,7 +52,7 @@ public struct InvoiceService {
     }
 }
 
-enum InvoiceAPI {
+enum InvoicesAPI {
     case createInvoice(InvoiceUploadModel)
     case incomingInvoiceHistory(InvoiceHistoryUploadModel)
     case outgoingInvoiceHistory(InvoiceHistoryUploadModel)
@@ -61,7 +61,7 @@ enum InvoiceAPI {
     case decodeBolt11(String)
 }
 
-extension InvoiceAPI: EndpointType {
+extension InvoicesAPI: EndpointType {
     public var baseURL: URL {
         guard let url = URL(string: prodAPI) else { fatalError("baseURL not configured.") }
         return url
