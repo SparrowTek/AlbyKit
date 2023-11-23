@@ -18,7 +18,7 @@ extension JSONDecoder {
             
             if let dateStr = try? container.decode(String.self) {
                 let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ" ////// 2022-06-02T08:40:08.000Z  2022-06-02T08:31:15Z
+                dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
                 dateFormatter.locale = Locale(identifier: "en_US_POSIX")
                 dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
                 
