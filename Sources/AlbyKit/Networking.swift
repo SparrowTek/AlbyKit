@@ -13,6 +13,26 @@ extension JSONDecoder {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         
+        decoder.dateDecodingStrategy = .custom { decoder in
+            let container = try decoder.singleValueContainer()
+            
+            if let dateStr = try? container.decode(String.self) {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ" ////// 2022-06-02T08:40:08.000Z  2022-06-02T08:31:15Z
+                dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+                dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+                
+                if let date = dateFormatter.date(from: dateStr) {
+                    return date
+                }
+                
+            } else if let dateInt = try? container.decode(Int.self) {
+                return Date(timeIntervalSince1970: TimeInterval(dateInt))
+            }
+            
+            throw DecodingError.dataCorruptedError(in: container, debugDescription: "Invalid date format")
+        }
+        
         return decoder
     }
 }
@@ -24,30 +44,6 @@ let routerDelegate = AlbyRouterDelegate()
 class AlbyRouterDelegate: NetworkRouterDelegate {
     func intercept(_ request: inout URLRequest) async {
         // TODO: add any headers here
-//        let errorMessage = """
-//PODCASTINDEXKIT Error: your apiKey, secretKey, and userAgent were not set.
-//Please follow the intructions in the README for setting up the PodcastIndexKit framework
-//Hint: You must call the static setup(apiKey: String, apiSecret: String, userAgent: String) method before using the framework
-//"""
-//        guard let apiKey = PodcastIndexKit.apiKey, let apiSecret = PodcastIndexKit.apiSecret, let userAgent = PodcastIndexKit.userAgent else { fatalError(errorMessage) }
-//        
-//        // prep for crypto
-//        let apiHeaderTime = String(Int(Date().timeIntervalSince1970))
-//        let data4Hash = apiKey + apiSecret + "\(apiHeaderTime)"
-//        
-//        // ======== Hash them to get the Authorization token ========
-//        let inputData = Data(data4Hash.utf8)
-//        let hashed = Insecure.SHA1.hash(data: inputData)
-//        let hashString = hashed.compactMap { String(format: "%02x", $0) }.joined()
-//        
-//        // set Headers
-//        request.addValue(apiHeaderTime, forHTTPHeaderField: "X-Auth-Date")
-//        request.addValue(apiKey, forHTTPHeaderField: "X-Auth-Key")
-//        request.addValue(hashString, forHTTPHeaderField: "Authorization")
-//        request.addValue(userAgent, forHTTPHeaderField: "User-Agent")
-        
-        
-//        request.addValue("application/json", forHTTPHeaderField: "Content-Type") // Doesn't need to be set here/ netweorking code sets this elsewhere
     }
     
     func shouldRetry(error: Error, attempts: Int) async throws -> Bool {

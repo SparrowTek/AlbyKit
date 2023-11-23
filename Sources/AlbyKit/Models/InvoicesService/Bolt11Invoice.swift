@@ -1,6 +1,8 @@
+import Foundation
+
 public struct Bolt11Invoice: Codable, Sendable {
     public let currency: Currency
-    public let createdAt: Int // 1693210330,  // TODO: should this be a date?
+    public let createdAt: Date
     public let expiry: Int
     public let payee: String
     public let msatoshi: Int

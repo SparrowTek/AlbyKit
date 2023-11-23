@@ -5,12 +5,12 @@ public struct Invoice: Codable, Sendable {
     public let amount: Int
     public let boostagram: Boostagram?
     public let comment: String?
-    public let createdAt: Date // "2022-07-05T17:02:20.343Z", TODO: date set properly in codable
-    public let creationDate: Int // 1657040540, TODO: this is a date but isn't the same format, can we make this work with Codabale
+    public let createdAt: Date
+    public let creationDate: Date
     public let currency: Currency
     public let customRecords: [String : String]?
     public let descriptionHash: String?
-    public let expiresAt: Date // "2022-07-05T17:17:20.000Z", TODO: more date stuff
+    public let expiresAt: Date
     public let expiry: Int
     public let identifier: String
     public let keysendMessage: String?
@@ -23,7 +23,7 @@ public struct Invoice: Codable, Sendable {
     public let paymentRequest: String
     public let rHashStr: String
     public let settled: Bool?
-    public let settledAt: Date? // TODO: more date stuff "2022-07-05T17:02:20.000Z",
+    public let settledAt: Date?
     public let state: InvoiceState
     public let type: String
     public let value: Int
