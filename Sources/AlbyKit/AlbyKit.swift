@@ -5,15 +5,9 @@ import SwiftData
 public final class AlbyKit {
     public init() { }
     
-//    static public func setup(apiKey: String, apiSecret: String, userAgent: String) {
-//        self.apiKey = apiKey
-//        self.apiSecret = apiSecret
-//        self.userAgent = userAgent
-//    }
-//    
-//    static var apiKey: String?
-//    static var apiSecret: String?
-//    static var userAgent: String?
+    static public func setup(api: API, clientID: String, clientSecret: String, redirectURI: String) {
+        AlbyEnvironment.current.setup(api: api, clientID: clientID, clientSecret: clientSecret, redirectURI: redirectURI)
+    }
     
     public let accountService = AccountsService()
     public let invoicesService = InvoicesService()

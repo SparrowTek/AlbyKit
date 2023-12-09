@@ -36,7 +36,8 @@ enum PaymentsAPI {
 
 extension PaymentsAPI: EndpointType {
     public var baseURL: URL {
-        guard let url = URL(string: prodAPI) else { fatalError("baseURL not configured.") }
+        guard let environmentURL = AlbyEnvironment.current.api else { fatalError("You must call the AlbyKit Setup method before using AlbyKit") }
+        guard let url = URL(string: environmentURL.rawValue) else { fatalError("baseURL not configured.") }
         return url
     }
     
