@@ -12,5 +12,5 @@ public final class AlbyKit {
     public let accountService = AccountsService()
     public let invoicesService = InvoicesService()
     public let paymentsService = PaymentsService()
+    public let oauthService = OAuthService()
 }
-
