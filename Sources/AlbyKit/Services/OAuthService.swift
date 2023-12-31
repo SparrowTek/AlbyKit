@@ -57,8 +57,7 @@ public class OAuthService: NSObject {
 
 extension OAuthService: SFSafariViewControllerDelegate {
     public func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
-        // TODO: maybe handle redirect here?
-        print("### didFinish")
+        // NO-OP
     }
 }
 
