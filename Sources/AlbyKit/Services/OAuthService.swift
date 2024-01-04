@@ -1,17 +1,22 @@
 import Foundation
 import SafariServices
+import CryptoKit
 
 public enum OAuthServiceError: Error {
     case badURL
     case clientIDNotSet
     case redirectURLNotSet
+    case generateCodeChallenge
+    case codeVerifier
 }
 
 public class OAuthService: NSObject {
     private let router = NetworkRouter<OAtuhAPI>(decoder: .albyDecoder)
+    private var codeVerifier: String?
     
-    public func authenticateWithUIKit(preferredControlerTintColor: UIColor? = nil, preferredBarTintColor: UIColor? = nil, withScopes scopes: [Scopes]) throws -> SFSafariViewController {
-        let url = try buildAuthURL(withScopes: scopes)
+    /// Get a `SFSafariViewController` to authenticate Alby
+    public func getAuthCodeWithUIKit(preferredControlerTintColor: UIColor? = nil, preferredBarTintColor: UIColor? = nil, withScopes scopes: [Scopes]) throws -> SFSafariViewController {
+        let url = try getAuthURL(withScopes: scopes)
         let safariViewController = SFSafariViewController(url: url)
         safariViewController.delegate = self
         safariViewController.preferredBarTintColor = preferredBarTintColor
@@ -19,21 +24,26 @@ public class OAuthService: NSObject {
         return safariViewController
     }
     
-    public func authenticateWithSwiftUI(preferredControlerTintColor: UIColor? = nil, preferredBarTintColor: UIColor? = nil, withScopes scopes: [Scopes]) throws -> SafariView {
-        let url = try buildAuthURL(withScopes: scopes)
+    /// Get a SafariView - a swiftUI `UIViewControllerRepresentable` that wraps `SFSafariViewController` and will allow Alby authentication
+    public func getAuthCodeWithSwiftUI(preferredControlerTintColor: UIColor? = nil, preferredBarTintColor: UIColor? = nil, withScopes scopes: [Scopes]) throws -> SafariView {
+        let url = try getAuthURL(withScopes: scopes)
         let safariView = SafariView(url: url, delegate: self, preferredControlerTintColor: preferredControlerTintColor, preferredBarTintColor: preferredBarTintColor)
         return safariView
     }
     
-    private func buildAuthURL(withScopes scopes: [Scopes]) throws -> URL {
+    /// Get the Alby authentication URL that must be opened in Safari
+    public func getAuthURL(withScopes scopes: [Scopes]) throws -> URL {
         guard let clientID = AlbyEnvironment.current.clientID else { throw OAuthServiceError.clientIDNotSet }
         guard let redirectURI = AlbyEnvironment.current.redirectURI else { throw OAuthServiceError.redirectURLNotSet }
-        guard let url = URL(string: "https://getalby.com/oauth?client_id=\(clientID)&response_type=code&redirect_uri=\(redirectURI)&scope=\(combineScopesString(scopes))") else { throw OAuthServiceError.badURL }
+        let urlPrefix = AlbyEnvironment.current.api == .prod ? "https://getalby.com" : "https://app.regtest.getalby.com"
+        let codeVerifier = PKCECodeGenerator.generateCodeVerifier()
+        self.codeVerifier = codeVerifier
+        let codeChallenge = try PKCECodeGenerator.generateCodeChallenge(from: codeVerifier)
+        guard let url = URL(string: "\(urlPrefix)/oauth?client_id=\(clientID)&code_challenge=\(codeChallenge)&code_challenge_method=S256&response_type=code&redirect_uri=\(redirectURI)&scope=\(combineScopesString(scopes))") else { throw OAuthServiceError.badURL }
         return url
     }
     
     private func combineScopesString(_ scopes: [Scopes]) -> String {
-        
         var scopeString = ""
         
         for scope in scopes {
@@ -47,11 +57,16 @@ public class OAuthService: NSObject {
         return scopeString
     }
     
+    /// Requests the OAuth token
+    public func requestAccessToken(code: String) async throws -> Token {
+        guard let codeVerifier else { throw OAuthServiceError.codeVerifier }
+        guard let redirectURI = AlbyEnvironment.current.redirectURI else { throw OAuthServiceError.redirectURLNotSet }
+        return try await router.execute(.requestToken(code: code, codeVerifier: codeVerifier, redirectURI: redirectURI))
+    }
+    
     /// Refreshes the OAuth token
-    public func refreshToken() async throws {
-        let token: String = try await router.execute(.token)
-        print("TOKEN: \(token)")
-        // TODO: Save token in keychain
+    public func refreshAccessToken(refreshToken: String) async throws -> Token {
+        try await router.execute(.refreshToken(refreshToken: refreshToken))
     }
 }
 
@@ -61,8 +76,36 @@ extension OAuthService: SFSafariViewControllerDelegate {
     }
 }
 
+fileprivate struct PKCECodeGenerator {
+    /// Generate a random string of 64 characters
+    static func generateCodeVerifier() -> String {
+        var buffer = [UInt8](repeating: 0, count: 64)
+        _ = SecRandomCopyBytes(kSecRandomDefault, buffer.count, &buffer)
+        return Data(buffer).base64URLEncodedString()
+    }
+    
+    /// Generate SHA-256 hash of the code verifier
+    /// Convert to URL-safe base64 without padding
+    static func generateCodeChallenge(from verifier: String) throws -> String {
+        guard let data = verifier.data(using: .utf8) else { throw OAuthServiceError.generateCodeChallenge }
+        let dataHash = SHA256.hash(data: data)
+        return Data(dataHash).base64URLEncodedString()
+    }
+}
+
+fileprivate extension Data {
+    func base64URLEncodedString() -> String {
+        base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+            .trimmingCharacters(in: .whitespaces)
+    }
+}
+
 enum OAtuhAPI {
-    case token
+    case requestToken(code: String, codeVerifier: String, redirectURI: String)
+    case refreshToken(refreshToken: String)
 }
 
 extension OAtuhAPI: EndpointType {
@@ -74,25 +117,57 @@ extension OAtuhAPI: EndpointType {
     
     var path: String {
         switch self {
-        case .token: "/oauth/token"
+        case .requestToken, .refreshToken: "/oauth/token"
         }
     }
     
     var httpMethod: HTTPMethod {
         switch self {
-        case .token:
-                return .get
+        case .requestToken, .refreshToken:
+            return .post
         }
     }
     
     var task: HTTPTask {
         switch self {
-        case .token:
-            return .request
+        case .requestToken(let code, let codeVerifier, let redirectURI):
+            let parameters: Parameters = [
+                "code" : code,
+                "code_verifier" : codeVerifier,
+                "grant_type" : "authorization_code",
+                "redirect_uri" : redirectURI,
+            ]
+            
+            return .requestParameters(encoding: .urlEncoding(parameters: parameters))
+            
+//            return .requestParameters(encoding: .jsonEncoding(parameters: parameters)) //.urlAndJsonEncoding(urlParameters: [:], bodyParameters: parameters)) // .urlEncoding(parameters: parameters)) // .jsonEncoding(parameters: parameters))
+        case .refreshToken(let refreshToken):
+            let parameters: Parameters = [
+                "refresh_token" : refreshToken,
+                "grant_type" : "refresh_token",
+            ]
+            
+            return .requestParameters(encoding: .jsonEncoding(parameters: parameters))
         }
     }
     
     var headers: HTTPHeaders? {
-        nil
+        switch self {
+        case .requestToken:
+            guard let clientID = AlbyEnvironment.current.clientID, let clientSecret = AlbyEnvironment.current.clientSecret else { return nil }
+            let credentialString = "\(clientID):\(clientSecret)"
+            guard let data = credentialString.data(using: .utf8) else { return nil }
+            let base64 = data.base64EncodedString()
+            
+            return [
+                "Content-Type" : "application/x-www-form-urlencoded",
+                "Authorization" : "Basic \(base64)",
+            ]
+        case .refreshToken:
+            return [
+                "Content-Type" : "multipart/form-data",
+                "Authorization" : "\(AlbyEnvironment.current.clientID ?? ""):\(AlbyEnvironment.current.clientSecret ?? "")",
+            ]
+        }
     }
 }

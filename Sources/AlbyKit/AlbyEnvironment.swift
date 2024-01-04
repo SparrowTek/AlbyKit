@@ -1,8 +1,8 @@
 import Foundation
 
 public enum API: String {
-    case prod = "api.getalby.com"
-    case dev = "api.regtest.getalby.com"
+    case prod = "https://api.getalby.com"
+    case dev =  "https://api.regtest.getalby.com"
 }
 
 class AlbyEnvironment {
