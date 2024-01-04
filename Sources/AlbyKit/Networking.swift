@@ -41,32 +41,10 @@ let routerDelegate = AlbyRouterDelegate()
 
 class AlbyRouterDelegate: NetworkRouterDelegate {
     func intercept(_ request: inout URLRequest) async {
-        // TODO: add any headers here
+        // NO-OP
     }
     
     func shouldRetry(error: Error, attempts: Int) async throws -> Bool {
-//        false // TODO: implement shouldRetry
-        
-        
-//        func getNewToken() async throws -> Bool {
-////            shouldRefreshToken = true
-////            let newSession = try await AtProtoLexicons().refresh(attempts: attempts + 1)
-////            accessToken = newSession.accessJwt
-////            refreshToken = newSession.refreshJwt
-////            await delegate?.sessionUpdated(newSession)
-//            
-//            return true
-//        }
-//        
-//        // TODO: verify this works!
-//        if case .network(let networkError) = error as? AlbyError, case .statusCode(let statusCode, _) = networkError, let statusCode = statusCode?.rawValue, (400..<500).contains(statusCode), attempts == 1 {
-//            return try await getNewToken()
-//        } else if case .message(let message) = error as? AlbyError, message.code == AlbyErrorCode.generic.rawValue {
-//            return try await getNewToken()
-//        }
-        
-        // Maybe never retry ??
-        
         return false
     }
 }

@@ -139,8 +139,6 @@ extension OAtuhAPI: EndpointType {
             ]
             
             return .requestParameters(encoding: .urlEncoding(parameters: parameters))
-            
-//            return .requestParameters(encoding: .jsonEncoding(parameters: parameters)) //.urlAndJsonEncoding(urlParameters: [:], bodyParameters: parameters)) // .urlEncoding(parameters: parameters)) // .jsonEncoding(parameters: parameters))
         case .refreshToken(let refreshToken):
             let parameters: Parameters = [
                 "refresh_token" : refreshToken,
