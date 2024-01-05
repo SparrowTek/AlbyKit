@@ -9,6 +9,11 @@ public final class AlbyKit {
         AlbyEnvironment.current.setup(api: api, clientID: clientID, clientSecret: clientSecret, redirectURI: redirectURI)
     }
     
+    static public func set(accessToken: String?, refreshToken: String?) {
+        AlbyEnvironment.current.accessToken = accessToken
+        AlbyEnvironment.current.refreshToken = refreshToken
+    }
+    
     public let accountService = AccountsService()
     public let invoicesService = InvoicesService()
     public let paymentsService = PaymentsService()

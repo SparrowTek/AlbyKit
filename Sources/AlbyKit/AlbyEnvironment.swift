@@ -12,6 +12,8 @@ class AlbyEnvironment {
     var clientID: String?
     var clientSecret: String?
     var redirectURI: String?
+    var accessToken: String?
+    var refreshToken: String?
     
     private init() {}
     

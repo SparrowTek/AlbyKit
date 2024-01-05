@@ -64,7 +64,11 @@ extension PaymentsAPI: EndpointType {
     }
     
     var headers: HTTPHeaders? {
-        nil
+        guard let accessToken = AlbyEnvironment.current.accessToken else { return nil }
+        return switch self {
+        case .bolt11, .keysend, .multiKeysend:
+            ["Authorization" : "Bearer \(accessToken)"]
+        }
     }
 }
 

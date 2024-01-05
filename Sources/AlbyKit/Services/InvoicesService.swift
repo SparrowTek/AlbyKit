@@ -106,6 +106,10 @@ extension InvoicesAPI: EndpointType {
     }
     
     var headers: HTTPHeaders? {
-        nil
+        guard let accessToken = AlbyEnvironment.current.accessToken else { return nil }
+        return switch self {
+        case .incomingInvoiceHistory, .outgoingInvoiceHistory, .allInvoiceHistory, .invoice, .decodeBolt11, .createInvoice:
+            ["Authorization" : "Bearer \(accessToken)"]
+        }
     }
 }

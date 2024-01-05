@@ -45,6 +45,8 @@ class AlbyRouterDelegate: NetworkRouterDelegate {
     }
     
     func shouldRetry(error: Error, attempts: Int) async throws -> Bool {
+        
+        // TODO: get a new token
         return false
     }
 }
