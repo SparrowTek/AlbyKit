@@ -14,6 +14,8 @@ class AlbyEnvironment {
     var redirectURI: String?
     var accessToken: String?
     var refreshToken: String?
+    let routerDelegate = AlbyRouterDelegate()
+    weak var delegate: AlbyKitDelegate?
     
     private init() {}
     

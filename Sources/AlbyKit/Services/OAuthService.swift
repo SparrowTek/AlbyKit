@@ -150,22 +150,22 @@ extension OAtuhAPI: EndpointType {
     }
     
     var headers: HTTPHeaders? {
-        switch self {
-        case .requestToken:
-            guard let clientID = AlbyEnvironment.current.clientID, let clientSecret = AlbyEnvironment.current.clientSecret else { return nil }
-            let credentialString = "\(clientID):\(clientSecret)"
-            guard let data = credentialString.data(using: .utf8) else { return nil }
-            let base64 = data.base64EncodedString()
-            
-            return [
+        guard let clientID = AlbyEnvironment.current.clientID, let clientSecret = AlbyEnvironment.current.clientSecret else { return nil }
+        let credentialString = "\(clientID):\(clientSecret)"
+        guard let data = credentialString.data(using: .utf8) else { return nil }
+        let base64 = data.base64EncodedString()
+        
+        return switch self {
+        case .requestToken, .refreshToken:
+            [
                 "Content-Type" : "application/x-www-form-urlencoded",
                 "Authorization" : "Basic \(base64)",
             ]
-        case .refreshToken:
-            return [
-                "Content-Type" : "multipart/form-data",
-                "Authorization" : "\(AlbyEnvironment.current.clientID ?? ""):\(AlbyEnvironment.current.clientSecret ?? "")",
-            ]
+//        case .refreshToken:
+//            [
+//                "Content-Type" : "multipart/form-data",
+//                "Authorization" : "Basic \(base64)",
+//            ]
         }
     }
 }

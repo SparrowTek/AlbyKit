@@ -1,7 +1,11 @@
 import Foundation
 
 public struct AccountsService {
-    private let router = NetworkRouter<AccountsAPI>(decoder: .albyDecoder)
+    private let router: NetworkRouter<AccountsAPI> = {
+        let router = NetworkRouter<AccountsAPI>(decoder: .albyDecoder)
+        router .delegate = AlbyEnvironment.current.routerDelegate
+        return router
+    }()
     
     /// Get value4value information
     /// Scope needed: account:read

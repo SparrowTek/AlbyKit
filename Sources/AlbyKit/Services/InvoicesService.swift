@@ -1,7 +1,11 @@
 import Foundation
 
 public struct InvoicesService {
-    private let router = NetworkRouter<InvoicesAPI>(decoder: .albyDecoder)
+    private let router: NetworkRouter<InvoicesAPI> = {
+        let router = NetworkRouter<InvoicesAPI>(decoder: .albyDecoder)
+        router .delegate = AlbyEnvironment.current.routerDelegate
+        return router
+    }()
     
     /// Create an invoice
     /// Scope needed: invoices:create

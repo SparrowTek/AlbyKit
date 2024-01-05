@@ -14,8 +14,16 @@ public final class AlbyKit {
         AlbyEnvironment.current.refreshToken = refreshToken
     }
     
+    static public func setDelegate(_ delegate: AlbyKitDelegate) {
+        AlbyEnvironment.current.delegate = delegate
+    }
+    
     public let accountService = AccountsService()
     public let invoicesService = InvoicesService()
     public let paymentsService = PaymentsService()
     public let oauthService = OAuthService()
+}
+
+public protocol AlbyKitDelegate: AnyObject {
+    func tokenUpdated(_ token: Token)
 }

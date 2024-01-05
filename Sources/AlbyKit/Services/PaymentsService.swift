@@ -1,7 +1,11 @@
 import Foundation
 
 public struct PaymentsService {
-    private let router = NetworkRouter<PaymentsAPI>(decoder: .albyDecoder)
+    private let router: NetworkRouter<PaymentsAPI> = {
+        let router = NetworkRouter<PaymentsAPI>(decoder: .albyDecoder)
+        router .delegate = AlbyEnvironment.current.routerDelegate
+        return router
+    }()
     
     /// BOLT11 payment
     /// Scope needed: payments:send
