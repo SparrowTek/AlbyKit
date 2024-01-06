@@ -45,17 +45,8 @@ class AlbyRouterDelegate: NetworkRouterDelegate {
     func shouldRetry(error: Error, attempts: Int) async throws -> Bool {
         if case .statusCode(let code, _) = error as? NetworkError, code == .unauthorized {
             if attempts == 1 {
-                guard let refreshToken = AlbyEnvironment.current.refreshToken else {
-                    AlbyEnvironment.current.delegate?.unautherizedUser()
-                    return false
-                }
-                
                 do {
-                    let token = try await OAuthService().refreshAccessToken(refreshToken: refreshToken)
-                    AlbyEnvironment.current.delegate?.tokenUpdated(token)
-                    AlbyEnvironment.current.accessToken = token.accessToken
-                    AlbyEnvironment.current.refreshToken = token.refreshToken
-                    
+                    try await OAuthService().refreshAccessToken()
                     return true
                 } catch {
                     AlbyEnvironment.current.delegate?.unautherizedUser()

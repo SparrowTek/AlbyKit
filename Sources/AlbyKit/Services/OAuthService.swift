@@ -65,8 +65,11 @@ public class OAuthService: NSObject {
     }
     
     /// Refreshes the OAuth token
-    public func refreshAccessToken(refreshToken: String) async throws -> Token {
-        try await router.execute(.refreshToken(refreshToken: refreshToken))
+    public func refreshAccessToken() async throws {
+        let token: Token = try await router.execute(.refreshToken)
+        AlbyEnvironment.current.delegate?.tokenUpdated(token)
+        AlbyEnvironment.current.accessToken = token.accessToken
+        AlbyEnvironment.current.refreshToken = token.refreshToken
     }
 }
 
@@ -105,7 +108,7 @@ fileprivate extension Data {
 
 enum OAtuhAPI {
     case requestToken(code: String, codeVerifier: String, redirectURI: String)
-    case refreshToken(refreshToken: String)
+    case refreshToken
 }
 
 extension OAtuhAPI: EndpointType {
@@ -139,13 +142,13 @@ extension OAtuhAPI: EndpointType {
             ]
             
             return .requestParameters(encoding: .urlEncoding(parameters: parameters))
-        case .refreshToken(let refreshToken):
+        case .refreshToken:
             let parameters: Parameters = [
-                "refresh_token" : refreshToken,
+                "refresh_token" : AlbyEnvironment.current.refreshToken ?? "",
                 "grant_type" : "refresh_token",
             ]
             
-            return .requestParameters(encoding: .jsonEncoding(parameters: parameters))
+            return .requestParameters(encoding: .urlEncoding(parameters: parameters))
         }
     }
     
@@ -156,16 +159,16 @@ extension OAtuhAPI: EndpointType {
         let base64 = data.base64EncodedString()
         
         return switch self {
-        case .requestToken, .refreshToken:
+        case .requestToken:
             [
                 "Content-Type" : "application/x-www-form-urlencoded",
                 "Authorization" : "Basic \(base64)",
             ]
-//        case .refreshToken:
-//            [
-//                "Content-Type" : "multipart/form-data",
-//                "Authorization" : "Basic \(base64)",
-//            ]
+        case .refreshToken:
+            [
+                "Content-Type" : "multipart/form-data",
+                "Authorization" : "Basic \(base64)",
+            ]
         }
     }
 }
