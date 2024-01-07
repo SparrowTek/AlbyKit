@@ -61,15 +61,22 @@ public class OAuthService: NSObject {
     public func requestAccessToken(code: String) async throws -> Token {
         guard let codeVerifier else { throw OAuthServiceError.codeVerifier }
         guard let redirectURI = AlbyEnvironment.current.redirectURI else { throw OAuthServiceError.redirectURLNotSet }
-        return try await router.execute(.requestToken(code: code, codeVerifier: codeVerifier, redirectURI: redirectURI))
+        let token: Token = try await router.execute(.requestToken(code: code, codeVerifier: codeVerifier, redirectURI: redirectURI))
+        try storeTokenMetadata(for: token)
+        return token
     }
     
     /// Refreshes the OAuth token
     public func refreshAccessToken() async throws {
         let token: Token = try await router.execute(.refreshToken)
+        try storeTokenMetadata(for: token)
         AlbyEnvironment.current.delegate?.tokenUpdated(token)
-        AlbyEnvironment.current.accessToken = token.accessToken
-        AlbyEnvironment.current.refreshToken = token.refreshToken
+    }
+    
+    private func storeTokenMetadata(for token: Token) throws {
+        let tokenMetadata = TokenMetadata(expiresIn: token.expiresIn, scope: token.scope, tokenType: token.tokenType, createdAt: .now)
+        try Storage.remove(AlbyEnvironment.Constants.token, from: .documents)
+        try Storage.store(tokenMetadata, to: .documents, as: AlbyEnvironment.Constants.token)
     }
 }
 
@@ -144,7 +151,7 @@ extension OAtuhAPI: EndpointType {
             return .requestParameters(encoding: .urlEncoding(parameters: parameters))
         case .refreshToken:
             let parameters: Parameters = [
-                "refresh_token" : AlbyEnvironment.current.refreshToken ?? "",
+                "refresh_token" : AlbyEnvironment.current.delegate?.getFreshToken() ?? "",
                 "grant_type" : "refresh_token",
             ]
             

@@ -57,6 +57,9 @@ class AlbyRouterDelegate: NetworkRouterDelegate {
                 AlbyEnvironment.current.delegate?.unautherizedUser()
                 return false
             }
+        } else if case .tokenRefresh = error as? NetworkError {
+            AlbyEnvironment.current.delegate?.unautherizedUser()
+            return false
         } else {
             if error.isOtherConnectionError {
                 AlbyEnvironment.current.delegate?.reachabilityDegradedNetworkPerformanceDetected()

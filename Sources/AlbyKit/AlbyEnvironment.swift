@@ -8,13 +8,16 @@ public enum API: String {
 class AlbyEnvironment {
     static var current: AlbyEnvironment = .init()
     
+    struct Constants {
+        static let token = "com.github.sparrowtek.albykit.filename.token"
+    }
+    
     var api: API?
     var clientID: String?
     var clientSecret: String?
     var redirectURI: String?
-    var accessToken: String?
-    var refreshToken: String?
     let routerDelegate = AlbyRouterDelegate()
+    let authManager = AuthManager()
     weak var delegate: AlbyKitDelegate?
     
     private init() {}

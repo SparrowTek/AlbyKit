@@ -75,7 +75,7 @@ extension AccountsAPI: EndpointType {
     }
     
     var headers: HTTPHeaders? {
-        guard let accessToken = AlbyEnvironment.current.accessToken else { return nil }
+        guard let accessToken = AlbyEnvironment.current.delegate?.getAccessToken() else { return nil }
         
         return switch self {
         case .value4Value, .accountBalance, .summary, .me:

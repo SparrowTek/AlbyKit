@@ -9,11 +9,6 @@ public final class AlbyKit {
         AlbyEnvironment.current.setup(api: api, clientID: clientID, clientSecret: clientSecret, redirectURI: redirectURI)
     }
     
-    static public func set(accessToken: String?, refreshToken: String?) {
-        AlbyEnvironment.current.accessToken = accessToken
-        AlbyEnvironment.current.refreshToken = refreshToken
-    }
-    
     static public func setDelegate(_ delegate: AlbyKitDelegate) {
         AlbyEnvironment.current.delegate = delegate
     }
@@ -29,4 +24,6 @@ public protocol AlbyKitDelegate: AnyObject {
     func unautherizedUser()
     func reachabilityDegradedNetworkPerformanceDetected()
     func reachabilityNormalPerformance()
+    func getAccessToken() -> String?
+    func getFreshToken() -> String?
 }

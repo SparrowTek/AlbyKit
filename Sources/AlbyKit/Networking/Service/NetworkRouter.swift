@@ -21,6 +21,7 @@ public enum NetworkError : Error, Sendable {
     case statusCode(_ statusCode: StatusCode?, data: Data)
     case noStatusCode
     case noData
+    case tokenRefresh
 }
 
 typealias HTTPHeaders = [String:String]
@@ -57,6 +58,8 @@ class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
     /// This method is async and it can throw errors
     /// - Returns: The generic type is returned
     func execute<T: Decodable>(_ route: Endpoint, attempts: Int = 1) async throws -> T {
+        try await checkToken()
+        
         guard var request = try? buildRequest(from: route) else { throw NetworkError.encodingFailed }
         await delegate?.intercept(&request)
         
@@ -84,6 +87,15 @@ class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
             
             guard try await delegate.shouldRetry(error: errorToThrow, attempts: attempts) else { throw errorToThrow }
             return try await execute(route, attempts: attempts + 1)
+        }
+    }
+    
+    private func checkToken() async throws {
+        do {
+            try await AlbyEnvironment.current.authManager.validateToken()
+        } catch {
+            AlbyEnvironment.current.delegate?.unautherizedUser()
+            throw NetworkError.tokenRefresh
         }
     }
     
