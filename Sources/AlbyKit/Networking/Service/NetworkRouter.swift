@@ -12,7 +12,7 @@ protocol NetworkRouterDelegate: AnyObject {
 protocol NetworkRouterProtocol: AnyObject {
     associatedtype Endpoint: EndpointType
     var delegate: NetworkRouterDelegate? { get set }
-    func execute<T: Decodable>(_ route: Endpoint, attempts: Int) async throws -> T
+    func execute<T: Decodable>(_ route: Endpoint, attempts: Int, shouldCheckToken: Bool) async throws -> T
 }
 
 public enum NetworkError : Error, Sendable {
@@ -57,8 +57,11 @@ class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
     /// This generic method will take a route and return the desired type via a network call
     /// This method is async and it can throw errors
     /// - Returns: The generic type is returned
-    func execute<T: Decodable>(_ route: Endpoint, attempts: Int = 1) async throws -> T {
-        try await checkToken()
+    func execute<T: Decodable>(_ route: Endpoint, attempts: Int = 1, shouldCheckToken: Bool = true) async throws -> T {
+        
+        if shouldCheckToken {
+            try await checkToken()
+        }
         
         guard var request = try? buildRequest(from: route) else { throw NetworkError.encodingFailed }
         await delegate?.intercept(&request)

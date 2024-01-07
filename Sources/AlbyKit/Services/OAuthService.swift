@@ -61,14 +61,14 @@ public class OAuthService: NSObject {
     public func requestAccessToken(code: String) async throws -> Token {
         guard let codeVerifier else { throw OAuthServiceError.codeVerifier }
         guard let redirectURI = AlbyEnvironment.current.redirectURI else { throw OAuthServiceError.redirectURLNotSet }
-        let token: Token = try await router.execute(.requestToken(code: code, codeVerifier: codeVerifier, redirectURI: redirectURI))
+        let token: Token = try await router.execute(.requestToken(code: code, codeVerifier: codeVerifier, redirectURI: redirectURI), shouldCheckToken: false)
         try storeTokenMetadata(for: token)
         return token
     }
     
     /// Refreshes the OAuth token
     public func refreshAccessToken() async throws {
-        let token: Token = try await router.execute(.refreshToken)
+        let token: Token = try await router.execute(.refreshToken, shouldCheckToken: false)
         try storeTokenMetadata(for: token)
         AlbyEnvironment.current.delegate?.tokenUpdated(token)
     }
