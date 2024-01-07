@@ -28,7 +28,7 @@ typealias HTTPHeaders = [String:String]
 
 
 /// The NetworkRouter is a generic class that has an ``EndpointType`` and it conforms to ``NetworkRouterProtocol``
-class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
+internal class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
     
     weak var delegate: NetworkRouterDelegate?
     let networking: Networking

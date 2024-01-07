@@ -7,6 +7,7 @@ actor AuthManager {
         if let refreshTask {
             try await refreshTask.value
             self.refreshTask = nil
+            return
         }
         
         if let token = Storage.retrieve(AlbyEnvironment.Constants.token, from: .documents, as: TokenMetadata.self) {
@@ -17,6 +18,8 @@ actor AuthManager {
             if timeDiff <= fiveMinutesInSeconds {
                 try await refreshToken()
             }
+        } else {
+            try await refreshToken()
         }
     }
     

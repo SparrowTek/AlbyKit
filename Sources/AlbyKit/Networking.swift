@@ -72,7 +72,7 @@ class AlbyRouterDelegate: NetworkRouterDelegate {
     }
 }
 
-public var NSURLErrorConnectionFailureCodes: [Int] {
+fileprivate var NSURLErrorConnectionFailureCodes: [Int] {
     [
         NSURLErrorBackgroundSessionInUseByAnotherProcess, /// Error Code: `-996`
         NSURLErrorCannotFindHost, /// Error Code: ` -1003`
@@ -86,7 +86,7 @@ public var NSURLErrorConnectionFailureCodes: [Int] {
 extension Error {
     /// Indicates an error which is caused by various connection related issue or an unaccepted status code.
     /// See: `NSURLErrorConnectionFailureCodes`
-    var isOtherConnectionError: Bool {
+    fileprivate var isOtherConnectionError: Bool {
         NSURLErrorConnectionFailureCodes.contains(_code)
     }
 }
