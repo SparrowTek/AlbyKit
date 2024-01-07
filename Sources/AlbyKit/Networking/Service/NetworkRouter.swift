@@ -64,6 +64,7 @@ class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
         guard let httpResponse = response as? HTTPURLResponse else { throw NetworkError.noStatusCode }
         switch httpResponse.statusCode {
         case 200...299:
+            AlbyEnvironment.current.delegate?.reachabilityNormalPerformance()
             return try decoder.decode(T.self, from: data)
         default:
             let statusCode = StatusCode(rawValue: httpResponse.statusCode)

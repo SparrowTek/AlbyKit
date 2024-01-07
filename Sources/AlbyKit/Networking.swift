@@ -44,6 +44,7 @@ class AlbyRouterDelegate: NetworkRouterDelegate {
     
     func shouldRetry(error: Error, attempts: Int) async throws -> Bool {
         if case .statusCode(let code, _) = error as? NetworkError, code == .unauthorized {
+            AlbyEnvironment.current.delegate?.reachabilityNormalPerformance()
             if attempts == 1 {
                 do {
                     try await OAuthService().refreshAccessToken()
@@ -57,7 +58,32 @@ class AlbyRouterDelegate: NetworkRouterDelegate {
                 return false
             }
         } else {
+            if error.isOtherConnectionError {
+                AlbyEnvironment.current.delegate?.reachabilityDegradedNetworkPerformanceDetected()
+            } else {
+                AlbyEnvironment.current.delegate?.reachabilityNormalPerformance()
+            }
+            
             return false
         }
+    }
+}
+
+public var NSURLErrorConnectionFailureCodes: [Int] {
+    [
+        NSURLErrorBackgroundSessionInUseByAnotherProcess, /// Error Code: `-996`
+        NSURLErrorCannotFindHost, /// Error Code: ` -1003`
+        NSURLErrorCannotConnectToHost, /// Error Code: ` -1004`
+        NSURLErrorNetworkConnectionLost, /// Error Code: ` -1005`
+        NSURLErrorNotConnectedToInternet, /// Error Code: ` -1009`
+        NSURLErrorSecureConnectionFailed /// Error Code: ` -1200`
+    ]
+}
+
+extension Error {
+    /// Indicates an error which is caused by various connection related issue or an unaccepted status code.
+    /// See: `NSURLErrorConnectionFailureCodes`
+    var isOtherConnectionError: Bool {
+        NSURLErrorConnectionFailureCodes.contains(_code)
     }
 }

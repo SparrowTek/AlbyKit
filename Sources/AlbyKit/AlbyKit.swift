@@ -27,4 +27,6 @@ public final class AlbyKit {
 public protocol AlbyKitDelegate: AnyObject {
     func tokenUpdated(_ token: Token)
     func unautherizedUser()
+    func reachabilityDegradedNetworkPerformanceDetected()
+    func reachabilityNormalPerformance()
 }
