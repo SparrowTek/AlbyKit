@@ -31,7 +31,7 @@ public struct Invoice: Codable, Sendable {
     // MARK: unsettled invoice properties
     public let fiatCurrency: String?
     public let fiatInCents: Int?
-    public let metadata: String? // TODO: is this the correct type?
+//    public let metadata: String? // TODO: is this the correct type?
     public let destinationAlias: String? // TODO: is this the correct type?
     public let destinationPubkey: String? // TODO: is this the correct type?
     public let firstRouteHintPubkey: String? // TODO: is this the correct type?
