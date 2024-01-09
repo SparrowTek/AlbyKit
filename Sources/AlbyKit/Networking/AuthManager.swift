@@ -2,19 +2,13 @@ import Foundation
 
 actor AuthManager {
     private var refreshTask: Task<Void, Error>?
-    var tokenRefreshRequired = false
-    
-    func triggerTokenRefreshRequired() {
-        guard tokenRefreshRequired else { return }
-        tokenRefreshRequired = true
-    }
     
     func validateToken() async throws {
         if let refreshTask {
             try await refreshTask.value
             self.refreshTask = nil
-            tokenRefreshRequired = false
-        } else if tokenRefreshRequired {
+            AlbyEnvironment.current.tokenRefreshRequired = false
+        } else if AlbyEnvironment.current.tokenRefreshRequired {
             try await refreshToken()
         } else if let token = Storage.retrieve(AlbyEnvironment.Constants.token, from: .documents, as: TokenMetadata.self) {
             let tokenExpirationDate = token.createdAt.addingTimeInterval(TimeInterval(token.expiresIn))
@@ -41,7 +35,7 @@ actor AuthManager {
             refreshTask = task
             try await task.value
             refreshTask = nil
-            tokenRefreshRequired = false
+            AlbyEnvironment.current.tokenRefreshRequired = false
         }
     }
 }

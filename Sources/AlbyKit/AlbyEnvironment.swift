@@ -19,6 +19,7 @@ class AlbyEnvironment {
     let routerDelegate = AlbyRouterDelegate()
     let authManager = AuthManager()
     weak var delegate: AlbyKitDelegate?
+    var tokenRefreshRequired = false
     
     private init() {}
     
