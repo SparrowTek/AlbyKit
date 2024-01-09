@@ -35,7 +35,7 @@ actor AuthManager {
             refreshTask = task
             try await task.value
             refreshTask = nil
-            AlbyEnvironment.current.tokenRefreshRequired = false
+            AlbyEnvironment.current.tokenRefreshRequired = falsep
         }
     }
 }

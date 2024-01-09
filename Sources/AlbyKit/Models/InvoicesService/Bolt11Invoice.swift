@@ -1,7 +1,7 @@
 import Foundation
 
 public struct Bolt11Invoice: Codable, Sendable {
-    public let currency: Currency
+    public let currency: String
     public let createdAt: Date
     public let expiry: Int
     public let payee: String

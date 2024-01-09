@@ -7,7 +7,7 @@ public struct Invoice: Codable, Sendable {
     public let comment: String?
     public let createdAt: Date
     public let creationDate: Date
-    public let currency: Currency
+    public let currency: String
     public let customRecords: [String : String]?
     public let descriptionHash: String?
     public let expiresAt: Date
@@ -29,7 +29,7 @@ public struct Invoice: Codable, Sendable {
     public let value: Int
     
     // MARK: unsettled invoice properties
-    public let fiatCurrency: Currency?
+    public let fiatCurrency: String?
     public let fiatInCents: Int?
     public let metadata: String? // TODO: is this the correct type?
     public let destinationAlias: String? // TODO: is this the correct type?

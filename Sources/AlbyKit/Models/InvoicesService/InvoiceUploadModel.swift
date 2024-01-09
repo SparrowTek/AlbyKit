@@ -11,7 +11,7 @@ public struct InvoiceUploadModel: Codable, Sendable {
     public var descriptionHash: String?
     
     /// currency of the invoice. Default is "btc"
-    public var currency: Currency?
+    public var currency: String?
     
     /// same as `description` field.
     public var memo: String?
@@ -31,7 +31,7 @@ public struct InvoiceUploadModel: Codable, Sendable {
     /// Nostr or node pubkey of payer to store with the invoice (not included in the BOLT11 invoice)
     public var payerPubkey: String?
     
-    public init(amount: Int64, description: String? = nil, descriptionHash: String? = nil, currency: Currency? = nil, memo: String? = nil, comment: String? = nil, payerName: String? = nil, payerEmail: String? = nil, payerPubkey: String? = nil) {
+    public init(amount: Int64, description: String? = nil, descriptionHash: String? = nil, currency: String? = nil, memo: String? = nil, comment: String? = nil, payerName: String? = nil, payerEmail: String? = nil, payerPubkey: String? = nil) {
         self.amount = amount
         self.description = description
         self.descriptionHash = descriptionHash
