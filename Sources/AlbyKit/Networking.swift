@@ -46,7 +46,7 @@ class AlbyRouterDelegate: NetworkRouterDelegate {
         if case .network(let networkError) = error as? AlbyError, case .statusCode(let code, _) = networkError, code == .unauthorized {
             AlbyEnvironment.current.delegate?.reachabilityNormalPerformance()
             if attempts == 1 {
-                await AlbyEnvironment.current.tokenRefreshRequired = true
+                AlbyEnvironment.current.tokenRefreshRequired = true
                 return true
             } else {
                 AlbyEnvironment.current.delegate?.unautherizedUser()
