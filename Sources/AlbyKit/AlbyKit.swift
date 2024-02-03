@@ -17,6 +17,7 @@ public final class AlbyKit {
     public let invoicesService = InvoicesService()
     public let paymentsService = PaymentsService()
     public let oauthService = OAuthService()
+    public let helpers = Helpers()
 }
 
 public protocol AlbyKitDelegate: AnyObject {
