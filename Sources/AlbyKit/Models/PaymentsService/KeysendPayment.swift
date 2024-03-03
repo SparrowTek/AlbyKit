@@ -1,5 +1,5 @@
 
-public struct KeysendPayment: Codable, Sendable {
+public struct KeysendPayment: Codable, Equatable, Sendable {
     public let amount: Int
     public let description: String
     public let descriptionHash: String

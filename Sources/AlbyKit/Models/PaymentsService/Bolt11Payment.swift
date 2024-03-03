@@ -1,5 +1,5 @@
 
-public struct Bolt11Payment: Codable, Sendable {
+public struct Bolt11Payment: Codable, Equatable, Sendable {
     public let amount: Int
     public let description: String
     public let destination: String

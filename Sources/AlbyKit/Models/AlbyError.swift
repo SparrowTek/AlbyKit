@@ -20,6 +20,7 @@ public enum AlbyErrorCode: Int, Codable, Sendable {
     case generic
 }
 
+// TODO: support returning an ErrorMessage to the client?
 /*
  400: Bad Request
  {
