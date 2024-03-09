@@ -44,22 +44,22 @@ class AlbyRouterDelegate: NetworkRouterDelegate {
     
     func shouldRetry(error: Error, attempts: Int) async throws -> Bool {
         if case .network(let networkError) = error as? AlbyError, case .statusCode(let code, _) = networkError, code == .unauthorized {
-            AlbyEnvironment.current.delegate?.reachabilityNormalPerformance()
+            await AlbyEnvironment.current.delegate?.reachabilityNormalPerformance()
             if attempts == 1 {
                 AlbyEnvironment.current.tokenRefreshRequired = true
                 return true
             } else {
-                AlbyEnvironment.current.delegate?.unautherizedUser()
+                await AlbyEnvironment.current.delegate?.unautherizedUser()
                 return false
             }
         } else if case .tokenRefresh = error as? NetworkError {
-            AlbyEnvironment.current.delegate?.unautherizedUser()
+            await AlbyEnvironment.current.delegate?.unautherizedUser()
             return false
         } else {
             if error.isOtherConnectionError {
-                AlbyEnvironment.current.delegate?.reachabilityDegradedNetworkPerformanceDetected()
+                await AlbyEnvironment.current.delegate?.reachabilityDegradedNetworkPerformanceDetected()
             } else {
-                AlbyEnvironment.current.delegate?.reachabilityNormalPerformance()
+                await AlbyEnvironment.current.delegate?.reachabilityNormalPerformance()
             }
             
             return false

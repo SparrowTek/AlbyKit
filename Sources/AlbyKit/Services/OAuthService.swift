@@ -10,7 +10,7 @@ public enum OAuthServiceError: Error {
     case codeVerifier
 }
 
-public class OAuthService: NSObject {
+public final class OAuthService: NSObject, Sendable {
     private let router = NetworkRouter<OAtuhAPI>(decoder: .albyDecoder)
     private var codeVerifier: String?
     
@@ -70,7 +70,7 @@ public class OAuthService: NSObject {
     public func refreshAccessToken() async throws {
         let token: Token = try await router.execute(.refreshToken, shouldCheckToken: false)
         try storeTokenMetadata(for: token)
-        AlbyEnvironment.current.delegate?.tokenUpdated(token)
+        await AlbyEnvironment.current.delegate?.tokenUpdated(token)
     }
     
     private func storeTokenMetadata(for token: Token) throws {
@@ -139,43 +139,47 @@ extension OAtuhAPI: EndpointType {
     }
     
     var task: HTTPTask {
-        switch self {
-        case .requestToken(let code, let codeVerifier, let redirectURI):
-            let parameters: Parameters = [
-                "code" : code,
-                "code_verifier" : codeVerifier,
-                "grant_type" : "authorization_code",
-                "redirect_uri" : redirectURI,
-            ]
-            
-            return .requestParameters(encoding: .urlEncoding(parameters: parameters))
-        case .refreshToken:
-            let parameters: Parameters = [
-                "refresh_token" : AlbyEnvironment.current.delegate?.getFreshToken() ?? "",
-                "grant_type" : "refresh_token",
-            ]
-            
-            return .requestParameters(encoding: .urlEncoding(parameters: parameters))
+        get async {
+            switch self {
+            case .requestToken(let code, let codeVerifier, let redirectURI):
+                let parameters: Parameters = [
+                    "code" : code,
+                    "code_verifier" : codeVerifier,
+                    "grant_type" : "authorization_code",
+                    "redirect_uri" : redirectURI,
+                ]
+                
+                return .requestParameters(encoding: .urlEncoding(parameters: parameters))
+            case .refreshToken:
+                let parameters: Parameters = [
+                    "refresh_token" : await AlbyEnvironment.current.delegate?.getFreshToken() ?? "",
+                    "grant_type" : "refresh_token",
+                ]
+                
+                return .requestParameters(encoding: .urlEncoding(parameters: parameters))
+            }
         }
     }
     
     var headers: HTTPHeaders? {
-        guard let clientID = AlbyEnvironment.current.clientID, let clientSecret = AlbyEnvironment.current.clientSecret else { return nil }
-        let credentialString = "\(clientID):\(clientSecret)"
-        guard let data = credentialString.data(using: .utf8) else { return nil }
-        let base64 = data.base64EncodedString()
-        
-        return switch self {
-        case .requestToken:
-            [
-                "Content-Type" : "application/x-www-form-urlencoded",
-                "Authorization" : "Basic \(base64)",
-            ]
-        case .refreshToken:
-            [
-                "Content-Type" : "multipart/form-data",
-                "Authorization" : "Basic \(base64)",
-            ]
+        get async {
+            guard let clientID = AlbyEnvironment.current.clientID, let clientSecret = AlbyEnvironment.current.clientSecret else { return nil }
+            let credentialString = "\(clientID):\(clientSecret)"
+            guard let data = credentialString.data(using: .utf8) else { return nil }
+            let base64 = data.base64EncodedString()
+            
+            return switch self {
+            case .requestToken:
+                [
+                    "Content-Type" : "application/x-www-form-urlencoded",
+                    "Authorization" : "Basic \(base64)",
+                ]
+            case .refreshToken:
+                [
+                    "Content-Type" : "multipart/form-data",
+                    "Authorization" : "Basic \(base64)",
+                ]
+            }
         }
     }
 }

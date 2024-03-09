@@ -63,14 +63,14 @@ internal class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
             try await checkToken()
         }
         
-        guard var request = try? buildRequest(from: route) else { throw NetworkError.encodingFailed }
+        guard var request = try? await buildRequest(from: route) else { throw NetworkError.encodingFailed }
         await delegate?.intercept(&request)
         
         let (data, response) = try await networking.data(for: request, delegate: urlSessionTaskDelegate)
         guard let httpResponse = response as? HTTPURLResponse else { throw NetworkError.noStatusCode }
         switch httpResponse.statusCode {
         case 200...299:
-            AlbyEnvironment.current.delegate?.reachabilityNormalPerformance()
+            await AlbyEnvironment.current.delegate?.reachabilityNormalPerformance()
             return try decoder.decode(T.self, from: data)
         default:
             let statusCode = StatusCode(rawValue: httpResponse.statusCode)
@@ -97,12 +97,12 @@ internal class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
         do {
             try await AlbyEnvironment.current.authManager.validateToken()
         } catch {
-            AlbyEnvironment.current.delegate?.unautherizedUser()
+            await AlbyEnvironment.current.delegate?.unautherizedUser()
             throw NetworkError.tokenRefresh
         }
     }
     
-    func buildRequest(from route: Endpoint) throws -> URLRequest {
+    func buildRequest(from route: Endpoint) async throws -> URLRequest {
         
         var request = URLRequest(url: route.baseURL.appendingPathComponent(route.path),
                                  cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
@@ -110,12 +110,12 @@ internal class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
         
         request.httpMethod = route.httpMethod.rawValue
         do {
-            switch route.task {
+            switch await route.task {
             case .request:
                 request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                addAdditionalHeaders(route.headers, request: &request)
+                await addAdditionalHeaders(route.headers, request: &request)
             case .requestParameters(let parameterEncoding):
-                addAdditionalHeaders(route.headers, request: &request)
+                await addAdditionalHeaders(route.headers, request: &request)
                 try configureParameters(parameterEncoding: parameterEncoding, request: &request)
             }
             return request

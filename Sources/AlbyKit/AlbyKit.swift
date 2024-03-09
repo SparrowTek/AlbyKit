@@ -2,7 +2,7 @@ import Foundation
 import SwiftData
 
 @Observable
-public final class AlbyKit {
+public final class AlbyKit: Sendable {
     public init() { }
     
     static public func setup(api: API, clientID: String, clientSecret: String, redirectURI: String) {
@@ -20,6 +20,7 @@ public final class AlbyKit {
     public let helpers = Helpers()
 }
 
+@MainActor
 public protocol AlbyKitDelegate: AnyObject {
     func tokenUpdated(_ token: Token)
     func unautherizedUser()

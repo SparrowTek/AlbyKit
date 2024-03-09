@@ -1,6 +1,6 @@
 import Foundation
 
-public struct PaymentsService {
+public struct PaymentsService: Sendable {
     private let router: NetworkRouter<PaymentsAPI> = {
         let router = NetworkRouter<PaymentsAPI>(decoder: .albyDecoder)
         router .delegate = AlbyEnvironment.current.routerDelegate
@@ -68,10 +68,12 @@ extension PaymentsAPI: EndpointType {
     }
     
     var headers: HTTPHeaders? {
-        guard let accessToken = AlbyEnvironment.current.delegate?.getAccessToken() else { return nil }
-        return switch self {
-        case .bolt11, .keysend, .multiKeysend:
-            ["Authorization" : "Bearer \(accessToken)"]
+        get async {
+            guard let accessToken = await AlbyEnvironment.current.delegate?.getAccessToken() else { return nil }
+            return switch self {
+            case .bolt11, .keysend, .multiKeysend:
+                ["Authorization" : "Bearer \(accessToken)"]
+            }
         }
     }
 }

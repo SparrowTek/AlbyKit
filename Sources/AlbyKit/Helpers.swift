@@ -5,7 +5,7 @@ public enum HelperError: Error {
     case regexErrors
 }
 
-public struct Helpers {
+public struct Helpers: Sendable {
     public func findLightningAddressInText(_ text: String) throws -> String {
         // Define the regex patterns with case insensitivity
         let lightningPattern = #"(?i)((⚡|⚡️):?|lightning:|lnurl:)\s?([\w\-.]+@[\w\-.]+\.[\w\-.]+)"#

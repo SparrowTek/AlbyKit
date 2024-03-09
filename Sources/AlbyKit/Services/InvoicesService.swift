@@ -1,6 +1,6 @@
 import Foundation
 
-public struct InvoicesService {
+public struct InvoicesService: Sendable {
     private let router: NetworkRouter<InvoicesAPI> = {
         let router = NetworkRouter<InvoicesAPI>(decoder: .albyDecoder)
         router .delegate = AlbyEnvironment.current.routerDelegate
@@ -110,10 +110,12 @@ extension InvoicesAPI: EndpointType {
     }
     
     var headers: HTTPHeaders? {
-        guard let accessToken = AlbyEnvironment.current.delegate?.getAccessToken() else { return nil }
-        return switch self {
-        case .incomingInvoiceHistory, .outgoingInvoiceHistory, .allInvoiceHistory, .invoice, .decodeBolt11, .createInvoice:
-            ["Authorization" : "Bearer \(accessToken)"]
+        get async {
+            guard let accessToken = await AlbyEnvironment.current.delegate?.getAccessToken() else { return nil }
+            return switch self {
+            case .incomingInvoiceHistory, .outgoingInvoiceHistory, .allInvoiceHistory, .invoice, .decodeBolt11, .createInvoice:
+                ["Authorization" : "Bearer \(accessToken)"]
+            }
         }
     }
 }

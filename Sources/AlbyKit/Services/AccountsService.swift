@@ -1,6 +1,6 @@
 import Foundation
 
-public struct AccountsService {
+public struct AccountsService: Sendable {
     private let router: NetworkRouter<AccountsAPI> = {
         let router = NetworkRouter<AccountsAPI>(decoder: .albyDecoder)
         router .delegate = AlbyEnvironment.current.routerDelegate
@@ -75,11 +75,13 @@ extension AccountsAPI: EndpointType {
     }
     
     var headers: HTTPHeaders? {
-        guard let accessToken = AlbyEnvironment.current.delegate?.getAccessToken() else { return nil }
-        
-        return switch self {
-        case .value4Value, .accountBalance, .summary, .me:
-            ["Authorization" : "Bearer \(accessToken)"]
+        get async {
+            guard let accessToken = await AlbyEnvironment.current.delegate?.getAccessToken() else { return nil }
+            
+            return switch self {
+            case .value4Value, .accountBalance, .summary, .me:
+                ["Authorization" : "Bearer \(accessToken)"]
+            }
         }
     }
 }
