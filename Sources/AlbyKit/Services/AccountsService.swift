@@ -3,7 +3,7 @@ import Foundation
 public struct AccountsService: Sendable {
     private let router: NetworkRouter<AccountsAPI> = {
         let router = NetworkRouter<AccountsAPI>(decoder: .albyDecoder)
-        router .delegate = AlbyEnvironment.current.routerDelegate
+        router.delegate = AlbyEnvironment.current.routerDelegate
         return router
     }()
     

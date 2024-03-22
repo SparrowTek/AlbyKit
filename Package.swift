@@ -18,7 +18,11 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "AlbyKit"),
+            name: "AlbyKit",
+            swiftSettings: [
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
+        ),
         .testTarget(
             name: "AlbyKitTests",
             dependencies: ["AlbyKit"]),
