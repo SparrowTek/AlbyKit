@@ -1,18 +1,8 @@
-import Foundation
+@preconcurrency import Foundation
 
-protocol NetworkRouterDelegate: AnyObject {
+protocol NetworkRouterDelegate: AnyObject, Sendable {
     func intercept(_ request: inout URLRequest) async
     func shouldRetry(error: Error, attempts: Int) async throws -> Bool
-}
-
-/// Describes the implementation details of a NetworkRouter
-///
-/// ``NetworkRouter`` is the only implementation of this protocol available to the end user, but they can create their own
-/// implementations that can be used for testing for instance.
-protocol NetworkRouterProtocol: AnyObject {
-    associatedtype Endpoint: EndpointType
-    var delegate: NetworkRouterDelegate? { get set }
-    func execute<T: Decodable>(_ route: Endpoint, attempts: Int, shouldCheckToken: Bool) async throws -> T
 }
 
 public enum NetworkError : Error, Sendable {
@@ -28,12 +18,12 @@ typealias HTTPHeaders = [String:String]
 
 
 /// The NetworkRouter is a generic class that has an ``EndpointType`` and it conforms to ``NetworkRouterProtocol``
-internal class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
+internal actor NetworkRouter<Endpoint: EndpointType> {
     
     weak var delegate: NetworkRouterDelegate?
     let networking: Networking
     let urlSessionTaskDelegate: URLSessionTaskDelegate?
-    var decoder: JSONDecoder
+    let decoder: JSONDecoder
     
     init(networking: Networking? = nil, urlSessionDelegate: URLSessionDelegate? = nil, urlSessionTaskDelegate: URLSessionTaskDelegate? = nil, decoder: JSONDecoder? = nil, delegate: NetworkRouterDelegate? = nil) {
         if let networking = networking {
@@ -52,6 +42,10 @@ internal class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
             self.decoder = JSONDecoder()
             self.decoder.keyDecodingStrategy = .convertFromSnakeCase
         }
+    }
+    
+    func setDelegate(_ delegate: NetworkRouterDelegate?) {
+        self.delegate = delegate
     }
     
     /// This generic method will take a route and return the desired type via a network call
@@ -104,7 +98,7 @@ internal class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
     
     func buildRequest(from route: Endpoint) async throws -> URLRequest {
         
-        var request = URLRequest(url: route.baseURL.appendingPathComponent(route.path),
+        var request = await URLRequest(url: route.baseURL.appendingPathComponent(route.path),
                                  cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
                                  timeoutInterval: 10.0)
         

@@ -1,11 +1,12 @@
-import Foundation
+@preconcurrency import Foundation
 
 public struct InvoicesService: Sendable {
-    private let router: NetworkRouter<InvoicesAPI> = {
-        let router = NetworkRouter<InvoicesAPI>(decoder: .albyDecoder)
-        router.delegate = AlbyEnvironment.current.routerDelegate
-        return router
-    }()
+    private let router: NetworkRouter<InvoicesAPI>
+    
+    init() async {
+        router = NetworkRouter<InvoicesAPI>(decoder: .albyDecoder)
+        await router.setDelegate(AlbyEnvironment.current.routerDelegate)
+    }
     
     /// Create an invoice
     /// Scope needed: invoices:create
@@ -67,9 +68,11 @@ enum InvoicesAPI {
 
 extension InvoicesAPI: EndpointType {
     public var baseURL: URL {
-        guard let environmentURL = AlbyEnvironment.current.api else { fatalError("You must call the AlbyKit Setup method before using AlbyKit") }
-        guard let url = URL(string: environmentURL.rawValue) else { fatalError("baseURL not configured.") }
-        return url
+        get async {
+            guard let environmentURL = await AlbyEnvironment.current.api else { fatalError("You must call the AlbyKit Setup method before using AlbyKit") }
+            guard let url = URL(string: environmentURL.rawValue) else { fatalError("baseURL not configured.") }
+            return url
+        }
     }
     
     var path: String {

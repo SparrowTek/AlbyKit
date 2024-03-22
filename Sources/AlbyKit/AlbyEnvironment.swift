@@ -1,12 +1,12 @@
 import Foundation
 
-public enum API: String {
+public enum API: String, Sendable {
     case prod = "https://api.getalby.com"
     case dev =  "https://api.regtest.getalby.com"
 }
 
-class AlbyEnvironment {
-    static var current: AlbyEnvironment = .init()
+actor AlbyEnvironment {
+    static let current: AlbyEnvironment = AlbyEnvironment()
     
     struct Constants {
         static let token = "com.github.sparrowtek.albykit.filename.token"
@@ -20,6 +20,7 @@ class AlbyEnvironment {
     let authManager = AuthManager()
     weak var delegate: AlbyKitDelegate?
     var tokenRefreshRequired = false
+    var codeVerifier: String?
     
     private init() {}
     
@@ -28,5 +29,17 @@ class AlbyEnvironment {
         self.clientID = clientID
         self.clientSecret = clientSecret
         self.redirectURI = redirectURI
+    }
+    
+    func setDelegate(_ delegate: AlbyKitDelegate?) {
+        self.delegate = delegate
+    }
+    
+    func setTokenRefreshRequired(_ required: Bool) {
+        tokenRefreshRequired = required
+    }
+    
+    func setCodeVerifier(_ codeVerifier: String?) {
+        self.codeVerifier = codeVerifier
     }
 }

@@ -1,4 +1,4 @@
-import Foundation
+@preconcurrency import Foundation
 
 public struct LightningAddressDetailsProxyService: Sendable {
     private let router = NetworkRouter<LightningAddressDetailsProxyAPI>(decoder: .albyDecoder)
@@ -28,9 +28,11 @@ enum LightningAddressDetailsProxyAPI {
 
 extension LightningAddressDetailsProxyAPI: EndpointType {
     public var baseURL: URL {
-        guard let environmentURL = AlbyEnvironment.current.api else { fatalError("You must call the AlbyKit Setup method before using AlbyKit") }
-        guard let url = URL(string: environmentURL.rawValue) else { fatalError("baseURL not configured.") }
-        return url
+        get async {
+            guard let environmentURL = await AlbyEnvironment.current.api else { fatalError("You must call the AlbyKit Setup method before using AlbyKit") }
+            guard let url = URL(string: environmentURL.rawValue) else { fatalError("baseURL not configured.") }
+            return url
+        }
     }
     
     var path: String {
@@ -53,7 +55,7 @@ extension LightningAddressDetailsProxyAPI: EndpointType {
         case .requestInvoice(let lightningAddress, let amount, let comment):
             var parameters: Parameters = [:]
             append(lightningAddress, toParameters: &parameters, withKey: "ln]")
-            append(lightningAddress, toParameters: &parameters, withKey: "amount")
+            append(amount, toParameters: &parameters, withKey: "amount")
             append(comment, toParameters: &parameters, withKey: "comment")
             
             return .requestParameters(encoding: .urlEncoding(parameters: parameters))

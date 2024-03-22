@@ -37,7 +37,7 @@ extension JSONDecoder {
     }
 }
 
-class AlbyRouterDelegate: NetworkRouterDelegate {
+final class AlbyRouterDelegate: NetworkRouterDelegate, Sendable {
     func intercept(_ request: inout URLRequest) async {
         // NO-OP
     }
@@ -46,7 +46,7 @@ class AlbyRouterDelegate: NetworkRouterDelegate {
         if case .network(let networkError) = error as? AlbyError, case .statusCode(let code, _) = networkError, code == .unauthorized {
             await AlbyEnvironment.current.delegate?.reachabilityNormalPerformance()
             if attempts == 1 {
-                AlbyEnvironment.current.tokenRefreshRequired = true
+                await AlbyEnvironment.current.setTokenRefreshRequired(true)
                 return true
             } else {
                 await AlbyEnvironment.current.delegate?.unautherizedUser()

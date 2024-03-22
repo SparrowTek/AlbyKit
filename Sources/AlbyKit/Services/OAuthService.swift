@@ -1,4 +1,4 @@
-import Foundation
+@preconcurrency import Foundation
 import SafariServices
 import CryptoKit
 
@@ -12,11 +12,11 @@ public enum OAuthServiceError: Error {
 
 public final class OAuthService: NSObject, Sendable {
     private let router = NetworkRouter<OAtuhAPI>(decoder: .albyDecoder)
-    private var codeVerifier: String?
     
     /// Get a `SFSafariViewController` to authenticate Alby
-    public func getAuthCodeWithUIKit(preferredControlerTintColor: UIColor? = nil, preferredBarTintColor: UIColor? = nil, withScopes scopes: [Scopes]) throws -> SFSafariViewController {
-        let url = try getAuthURL(withScopes: scopes)
+    @MainActor
+    public func getAuthCodeWithUIKit(preferredControlerTintColor: UIColor? = nil, preferredBarTintColor: UIColor? = nil, withScopes scopes: [Scopes]) async throws -> SFSafariViewController {
+        let url = try await getAuthURL(withScopes: scopes)
         let safariViewController = SFSafariViewController(url: url)
         safariViewController.delegate = self
         safariViewController.preferredBarTintColor = preferredBarTintColor
@@ -25,19 +25,19 @@ public final class OAuthService: NSObject, Sendable {
     }
     
     /// Get a SafariView - a swiftUI `UIViewControllerRepresentable` that wraps `SFSafariViewController` and will allow Alby authentication
-    public func getAuthCodeWithSwiftUI(preferredControlerTintColor: UIColor? = nil, preferredBarTintColor: UIColor? = nil, withScopes scopes: [Scopes]) throws -> SafariView {
-        let url = try getAuthURL(withScopes: scopes)
+    public func getAuthCodeWithSwiftUI(preferredControlerTintColor: UIColor? = nil, preferredBarTintColor: UIColor? = nil, withScopes scopes: [Scopes]) async throws -> SafariView {
+        let url = try await getAuthURL(withScopes: scopes)
         let safariView = SafariView(url: url, delegate: self, preferredControlerTintColor: preferredControlerTintColor, preferredBarTintColor: preferredBarTintColor)
         return safariView
     }
     
     /// Get the Alby authentication URL that must be opened in Safari
-    public func getAuthURL(withScopes scopes: [Scopes]) throws -> URL {
-        guard let clientID = AlbyEnvironment.current.clientID else { throw OAuthServiceError.clientIDNotSet }
-        guard let redirectURI = AlbyEnvironment.current.redirectURI else { throw OAuthServiceError.redirectURLNotSet }
-        let urlPrefix = AlbyEnvironment.current.api == .prod ? "https://getalby.com" : "https://app.regtest.getalby.com"
+    public func getAuthURL(withScopes scopes: [Scopes]) async throws -> URL {
+        guard let clientID = await AlbyEnvironment.current.clientID else { throw OAuthServiceError.clientIDNotSet }
+        guard let redirectURI = await AlbyEnvironment.current.redirectURI else { throw OAuthServiceError.redirectURLNotSet }
+        let urlPrefix = await AlbyEnvironment.current.api == .prod ? "https://getalby.com" : "https://app.regtest.getalby.com"
         let codeVerifier = PKCECodeGenerator.generateCodeVerifier()
-        self.codeVerifier = codeVerifier
+        await AlbyEnvironment.current.setCodeVerifier(codeVerifier)
         let codeChallenge = try PKCECodeGenerator.generateCodeChallenge(from: codeVerifier)
         guard let url = URL(string: "\(urlPrefix)/oauth?client_id=\(clientID)&code_challenge=\(codeChallenge)&code_challenge_method=S256&response_type=code&redirect_uri=\(redirectURI)&scope=\(combineScopesString(scopes))") else { throw OAuthServiceError.badURL }
         return url
@@ -59,8 +59,8 @@ public final class OAuthService: NSObject, Sendable {
     
     /// Requests the OAuth token
     public func requestAccessToken(code: String) async throws -> Token {
-        guard let codeVerifier else { throw OAuthServiceError.codeVerifier }
-        guard let redirectURI = AlbyEnvironment.current.redirectURI else { throw OAuthServiceError.redirectURLNotSet }
+        guard let codeVerifier = await AlbyEnvironment.current.codeVerifier else { throw OAuthServiceError.codeVerifier }
+        guard let redirectURI = await AlbyEnvironment.current.redirectURI else { throw OAuthServiceError.redirectURLNotSet }
         let token: Token = try await router.execute(.requestToken(code: code, codeVerifier: codeVerifier, redirectURI: redirectURI), shouldCheckToken: false)
         try storeTokenMetadata(for: token)
         return token
@@ -120,9 +120,11 @@ enum OAtuhAPI {
 
 extension OAtuhAPI: EndpointType {
     public var baseURL: URL {
-        guard let environmentURL = AlbyEnvironment.current.api else { fatalError("You must call the AlbyKit Setup method before using AlbyKit") }
-        guard let url = URL(string: environmentURL.rawValue) else { fatalError("baseURL not configured.") }
-        return url
+        get async {
+            guard let environmentURL = await AlbyEnvironment.current.api else { fatalError("You must call the AlbyKit Setup method before using AlbyKit") }
+            guard let url = URL(string: environmentURL.rawValue) else { fatalError("baseURL not configured.") }
+            return url
+        }
     }
     
     var path: String {
@@ -163,7 +165,7 @@ extension OAtuhAPI: EndpointType {
     
     var headers: HTTPHeaders? {
         get async {
-            guard let clientID = AlbyEnvironment.current.clientID, let clientSecret = AlbyEnvironment.current.clientSecret else { return nil }
+            guard let clientID = await AlbyEnvironment.current.clientID, let clientSecret = await AlbyEnvironment.current.clientSecret else { return nil }
             let credentialString = "\(clientID):\(clientSecret)"
             guard let data = credentialString.data(using: .utf8) else { return nil }
             let base64 = data.base64EncodedString()

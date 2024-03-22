@@ -1,6 +1,6 @@
 import Foundation
 
-protocol Networking {
+protocol Networking: Sendable {
     func data(for request: URLRequest, delegate: URLSessionTaskDelegate?) async throws -> (Data, URLResponse)
 }
 
