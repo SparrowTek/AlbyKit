@@ -10,7 +10,7 @@ public struct LightningAddressDetailsProxyService {
     /// Returns the passed lightning address' LNURLp, Keysend and Nostr information.
     /// GET https://api.getalby.com/lnurl/lightning-address-details
     /// Returns the Lightning Address' LNURLp, Keysend and Nostr information.
-    public func getInfo(for lightningAddress: String) async throws -> Bolt11Invoice {
+    public func getInfo(for lightningAddress: String) async throws -> LightningAddressDetails {
         try await router.execute(.getInfo(lightningAddress: lightningAddress))
     }
     
@@ -19,7 +19,7 @@ public struct LightningAddressDetailsProxyService {
     /// GET https://api.getalby.com/lnurl/generate-invoice
     /// Creates a new invoice to receive lightning payments.
     /// Please refer to [https://github.com/lnurl/luds](https://github.com/lnurl/luds) (LUD-06, LUD-12, LUD-18) and any other LUD that extends the functionality of LUD-06 for more information on what parameters can be passed.
-    public func requestInvoice(lightningAddress: String, amount: String, comment: String?) async throws -> Bolt11Invoice {
+    public func requestInvoice(lightningAddress: String, amount: String, comment: String?) async throws -> GeneratedInvoice {
         try await router.execute(.requestInvoice(lightningAddress: lightningAddress, amount: amount, comment: comment))
     }
 }
