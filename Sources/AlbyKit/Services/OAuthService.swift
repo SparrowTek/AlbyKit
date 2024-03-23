@@ -15,6 +15,10 @@ public class OAuthService: NSObject {
     private let router = NetworkRouter<OAtuhAPI>(decoder: .albyDecoder)
     private var codeVerifier: String?
     
+    public override init() {
+        super.init()
+    }
+    
     /// Get a `SFSafariViewController` to authenticate Alby
     @MainActor
     public func getAuthCodeWithUIKit(preferredControlerTintColor: UIColor? = nil, preferredBarTintColor: UIColor? = nil, withScopes scopes: [Scopes]) async throws -> SFSafariViewController {

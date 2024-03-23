@@ -8,6 +8,8 @@ public struct InvoicesService {
         return router
     }()
     
+    public init() {}
+    
     /// Create an invoice
     /// Scope needed: invoices:create
     /// Creates a new invoice to receive lightning payments.

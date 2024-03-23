@@ -8,6 +8,8 @@ public struct AccountsService: Sendable {
         return router
     }()
     
+    public init() {}
+    
     /// Get value4value information
     /// Scope needed: account:read
     /// Returns the user's Lightning Address and keysend information.

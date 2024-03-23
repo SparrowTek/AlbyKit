@@ -4,6 +4,8 @@ import Foundation
 public struct LightningAddressDetailsProxyService {
     private let router = NetworkRouter<LightningAddressDetailsProxyAPI>(decoder: .albyDecoder)
     
+    public init() {}
+    
     /// Get Info
     /// Returns the passed lightning address' LNURLp, Keysend and Nostr information.
     /// GET https://api.getalby.com/lnurl/lightning-address-details

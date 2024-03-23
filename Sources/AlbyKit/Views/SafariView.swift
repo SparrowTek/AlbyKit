@@ -6,9 +6,9 @@
 //
 
 import SwiftUI
-import SafariServices
+@preconcurrency import SafariServices
 
-public struct SafariView: UIViewControllerRepresentable {
+public struct SafariView: UIViewControllerRepresentable, Sendable {
     let url: URL
     var delegate: SFSafariViewControllerDelegate?
     var preferredControlerTintColor: UIColor?

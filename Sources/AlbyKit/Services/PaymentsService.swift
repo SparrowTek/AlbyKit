@@ -8,6 +8,8 @@ public struct PaymentsService {
         return router
     }()
     
+    public init() {}
+    
     /// BOLT11 payment
     /// Scope needed: payments:send
     /// Pay a lightning invoice (bolt11)
