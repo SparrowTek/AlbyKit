@@ -1,6 +1,6 @@
 import Foundation
 
-public struct Bolt11Invoice: Codable, Sendable {
+public struct Bolt11Invoice: AlbyCodable, Sendable {
     public let currency: String
     public let createdAt: Date
     public let expiry: Int

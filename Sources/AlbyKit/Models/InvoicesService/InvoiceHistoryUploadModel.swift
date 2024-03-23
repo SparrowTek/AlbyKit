@@ -1,5 +1,5 @@
 
-public struct InvoiceHistoryUploadModel: Codable, Sendable {
+public struct InvoiceHistoryUploadModel: AlbyCodable, Sendable {
     
     /// Filter invoices created before the given invoice identifier
     public var before: String?

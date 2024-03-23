@@ -1,6 +1,6 @@
 import Foundation
 
-public struct AccountSummary: Codable, Sendable {
+public struct AccountSummary: AlbyCodable, Sendable {
     public let balance: Int
     public let boostagramsCount: Int
     public let currency: String

@@ -10,13 +10,15 @@ public enum OAuthServiceError: Error {
     case codeVerifier
 }
 
-public final class OAuthService: NSObject, Sendable {
+@AlbyActor
+public class OAuthService: NSObject {
     private let router = NetworkRouter<OAtuhAPI>(decoder: .albyDecoder)
     private var codeVerifier: String?
     
     /// Get a `SFSafariViewController` to authenticate Alby
-    public func getAuthCodeWithUIKit(preferredControlerTintColor: UIColor? = nil, preferredBarTintColor: UIColor? = nil, withScopes scopes: [Scopes]) throws -> SFSafariViewController {
-        let url = try getAuthURL(withScopes: scopes)
+    @MainActor
+    public func getAuthCodeWithUIKit(preferredControlerTintColor: UIColor? = nil, preferredBarTintColor: UIColor? = nil, withScopes scopes: [Scopes]) async throws -> SFSafariViewController {
+        let url = try await getAuthURL(withScopes: scopes)
         let safariViewController = SFSafariViewController(url: url)
         safariViewController.delegate = self
         safariViewController.preferredBarTintColor = preferredBarTintColor
@@ -81,6 +83,7 @@ public final class OAuthService: NSObject, Sendable {
 }
 
 extension OAuthService: SFSafariViewControllerDelegate {
+    nonisolated
     public func safariViewControllerDidFinish(_ controller: SFSafariViewController) {
         // NO-OP
     }
@@ -120,9 +123,11 @@ enum OAtuhAPI {
 
 extension OAtuhAPI: EndpointType {
     public var baseURL: URL {
-        guard let environmentURL = AlbyEnvironment.current.api else { fatalError("You must call the AlbyKit Setup method before using AlbyKit") }
-        guard let url = URL(string: environmentURL.rawValue) else { fatalError("baseURL not configured.") }
-        return url
+        get async {
+            guard let environmentURL = await AlbyEnvironment.current.api else { fatalError("You must call the AlbyKit Setup method before using AlbyKit") }
+            guard let url = URL(string: environmentURL.rawValue) else { fatalError("baseURL not configured.") }
+            return url
+        }
     }
     
     var path: String {
@@ -163,7 +168,7 @@ extension OAtuhAPI: EndpointType {
     
     var headers: HTTPHeaders? {
         get async {
-            guard let clientID = AlbyEnvironment.current.clientID, let clientSecret = AlbyEnvironment.current.clientSecret else { return nil }
+            guard let clientID = await AlbyEnvironment.current.clientID, let clientSecret = await AlbyEnvironment.current.clientSecret else { return nil }
             let credentialString = "\(clientID):\(clientSecret)"
             guard let data = credentialString.data(using: .utf8) else { return nil }
             let base64 = data.base64EncodedString()

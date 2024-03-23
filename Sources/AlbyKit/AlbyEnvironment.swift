@@ -1,10 +1,11 @@
 import Foundation
 
-public enum API: String {
+public enum API: String, Sendable {
     case prod = "https://api.getalby.com"
     case dev =  "https://api.regtest.getalby.com"
 }
 
+@AlbyActor
 class AlbyEnvironment {
     static var current: AlbyEnvironment = .init()
     
@@ -28,5 +29,13 @@ class AlbyEnvironment {
         self.clientID = clientID
         self.clientSecret = clientSecret
         self.redirectURI = redirectURI
+    }
+    
+    func setTokenRefreshRequired(_ tokenRefreshRequired: Bool) {
+        self.tokenRefreshRequired = tokenRefreshRequired
+    }
+    
+    func setDelegate(_ delegate: AlbyKitDelegate?) {
+        self.delegate = delegate
     }
 }

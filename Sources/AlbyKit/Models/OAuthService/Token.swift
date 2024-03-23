@@ -2,7 +2,7 @@
 import Foundation
 
 /// OAuth Token Information
-public struct Token: Codable, Sendable {
+public struct Token: AlbyCodable, Sendable {
     public let accessToken: String
     public let expiresIn: Int
     public let refreshToken: String
@@ -10,7 +10,7 @@ public struct Token: Codable, Sendable {
     public let tokenType: String
 }
 
-internal struct TokenMetadata: Codable, Sendable {
+internal struct TokenMetadata: AlbyCodable, Sendable {
     let expiresIn: Int
     let scope: String
     let tokenType: String

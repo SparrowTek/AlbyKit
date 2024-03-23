@@ -1,7 +1,7 @@
 
 /// Keysend payment
 /// Make a spontaneous keysend payment, with optional custom records. See for example: [https://github.com/lightning/blips/blob/master/blip-0010.md](https://github.com/lightning/blips/blob/master/blip-0010.md)
-public struct KeysendPaymentUploadModel: Codable, Sendable {
+public struct KeysendPaymentUploadModel: AlbyCodable, Sendable {
     
     /// Amount in satoshi. Must be a whole number greater than 0. (millisats are not supported)
     public var amount: Int64
@@ -23,7 +23,7 @@ public struct KeysendPaymentUploadModel: Codable, Sendable {
     }
 }
 
-public struct MultiKeysendPaymentUploadModel: Codable, Sendable {
+public struct MultiKeysendPaymentUploadModel: AlbyCodable, Sendable {
     
     /// Array of keysend objects (`KeysendPaymentUploadModel`)
     public var keysends: [KeysendPaymentUploadModel]

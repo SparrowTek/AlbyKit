@@ -2,6 +2,7 @@ import Foundation
 import SwiftData
 
 @Observable
+@AlbyActor
 public final class AlbyKit: Sendable {
     public init() { }
     
@@ -10,7 +11,7 @@ public final class AlbyKit: Sendable {
     }
     
     static public func setDelegate(_ delegate: AlbyKitDelegate) {
-        AlbyEnvironment.current.delegate = delegate
+        AlbyEnvironment.current.setDelegate(delegate)
     }
     
     public let accountService = AccountsService()
@@ -21,7 +22,7 @@ public final class AlbyKit: Sendable {
 }
 
 @MainActor
-public protocol AlbyKitDelegate: AnyObject {
+public protocol AlbyKitDelegate: AnyObject, Sendable {
     func tokenUpdated(_ token: Token)
     func unautherizedUser()
     func reachabilityDegradedNetworkPerformanceDetected()

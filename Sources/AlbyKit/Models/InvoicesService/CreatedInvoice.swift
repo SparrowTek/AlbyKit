@@ -1,6 +1,6 @@
 import Foundation
 
-public struct CreatedInvoice: Codable, Hashable, Sendable {
+public struct CreatedInvoice: AlbyCodable, Hashable, Sendable {
     public let amount: Int
     public let expiresAt: Date
     public let paymentHash: String

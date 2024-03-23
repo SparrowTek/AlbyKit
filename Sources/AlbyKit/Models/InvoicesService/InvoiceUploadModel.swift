@@ -1,6 +1,6 @@
 
 /// Invoice to be created
-public struct InvoiceUploadModel: Codable, Sendable {
+public struct InvoiceUploadModel: AlbyCodable, Sendable {
     /// amount, must be a whole number in sats (millisats are not supported).
     public var amount: Int64
     

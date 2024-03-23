@@ -1,5 +1,5 @@
 
-public struct PersonalInformation: Codable, Sendable {
+public struct PersonalInformation: AlbyCodable, Sendable {
     public let identifier: String
     public let email: String
     public let name: String?

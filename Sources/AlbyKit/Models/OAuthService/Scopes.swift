@@ -1,7 +1,7 @@
 
 /// Scopes
 /// Scopes allow you to request fine-grained access permissions for your application.
-public enum Scopes: String, Codable, Sendable {
+public enum Scopes: String, AlbyCodable, Sendable {
     /// Request the user's Lightning Address and their keysend information.
     case accountRead = "account:read"
     

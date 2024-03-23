@@ -1,5 +1,6 @@
 import Foundation
 
+@AlbyActor
 protocol NetworkRouterDelegate: AnyObject {
     func intercept(_ request: inout URLRequest) async
     func shouldRetry(error: Error, attempts: Int) async throws -> Bool
@@ -9,6 +10,7 @@ protocol NetworkRouterDelegate: AnyObject {
 ///
 /// ``NetworkRouter`` is the only implementation of this protocol available to the end user, but they can create their own
 /// implementations that can be used for testing for instance.
+@AlbyActor
 protocol NetworkRouterProtocol: AnyObject {
     associatedtype Endpoint: EndpointType
     var delegate: NetworkRouterDelegate? { get set }
@@ -27,7 +29,8 @@ public enum NetworkError : Error, Sendable {
 typealias HTTPHeaders = [String:String]
 
 
-/// The NetworkRouter is a generic class that has an ``EndpointType`` and it conforms to ``NetworkRouterProtocol``
+/// The NetworkRouter is a generic class that has an ``EndpointType`` and it conforms to ``NetworkRouterProtocol`
+@AlbyActor
 internal class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
     
     weak var delegate: NetworkRouterDelegate?
@@ -104,7 +107,7 @@ internal class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
     
     func buildRequest(from route: Endpoint) async throws -> URLRequest {
         
-        var request = URLRequest(url: route.baseURL.appendingPathComponent(route.path),
+        var request = await URLRequest(url: route.baseURL.appendingPathComponent(route.path),
                                  cachePolicy: .reloadIgnoringLocalAndRemoteCacheData,
                                  timeoutInterval: 10.0)
         

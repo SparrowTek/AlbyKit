@@ -1,7 +1,7 @@
 import Foundation
 
 // TODO: which properties are optional
-public struct Invoice: Codable, Sendable {
+public struct Invoice: AlbyCodable, Sendable {
     public let amount: Int
     public let boostagram: Boostagram?
     public let comment: String?
@@ -40,12 +40,12 @@ public struct Invoice: Codable, Sendable {
     public let qrCodeSvg: String?
 }
 
-public enum InvoiceState: String, Codable, Sendable {
+public enum InvoiceState: String, AlbyCodable, Sendable {
     case created = "CREATED"
     case settled = "SETTLED"
 }
 
-public struct Boostagram: Codable, Sendable {
+public struct Boostagram: AlbyCodable, Sendable {
     public let action: String
     public let appName: String
     public let boostLink: String

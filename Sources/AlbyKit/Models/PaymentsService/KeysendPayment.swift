@@ -1,5 +1,5 @@
 
-public struct KeysendPayment: Codable, Equatable, Sendable {
+public struct KeysendPayment: AlbyCodable, Equatable, Sendable {
     public let amount: Int
     public let description: String
     public let descriptionHash: String
@@ -10,16 +10,16 @@ public struct KeysendPayment: Codable, Equatable, Sendable {
     public let paymentPreimage: String
 }
 
-public struct MultiKeysendPayment: Codable, Sendable {
+public struct MultiKeysendPayment: AlbyCodable, Sendable {
     public let error: KeysendPaymentError?
     public let keysend: KeysendPayment
 }
 
-public struct KeysendPayments: Codable, Sendable {
+public struct KeysendPayments: AlbyCodable, Sendable {
     public let keysends: [MultiKeysendPayment]
 }
 
-public struct KeysendPaymentError: Codable, Sendable {
+public struct KeysendPaymentError: AlbyCodable, Sendable {
     public let code: Int
     public let error: Bool
     public let message: String

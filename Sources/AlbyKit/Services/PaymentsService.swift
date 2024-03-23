@@ -1,6 +1,7 @@
 import Foundation
 
-public struct PaymentsService: Sendable {
+@AlbyActor
+public struct PaymentsService {
     private let router: NetworkRouter<PaymentsAPI> = {
         let router = NetworkRouter<PaymentsAPI>(decoder: .albyDecoder)
         router.delegate = AlbyEnvironment.current.routerDelegate
@@ -40,9 +41,11 @@ enum PaymentsAPI {
 
 extension PaymentsAPI: EndpointType {
     public var baseURL: URL {
-        guard let environmentURL = AlbyEnvironment.current.api else { fatalError("You must call the AlbyKit Setup method before using AlbyKit") }
-        guard let url = URL(string: environmentURL.rawValue) else { fatalError("baseURL not configured.") }
-        return url
+        get async {
+            guard let environmentURL = await AlbyEnvironment.current.api else { fatalError("You must call the AlbyKit Setup method before using AlbyKit") }
+            guard let url = URL(string: environmentURL.rawValue) else { fatalError("baseURL not configured.") }
+            return url
+        }
     }
     
     var path: String {
