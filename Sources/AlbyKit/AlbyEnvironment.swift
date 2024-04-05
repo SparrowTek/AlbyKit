@@ -21,6 +21,7 @@ class AlbyEnvironment {
     let authManager = AuthManager()
     weak var delegate: AlbyKitDelegate?
     var tokenRefreshRequired = false
+    var codeVerifier: String?
     
     private init() {}
     

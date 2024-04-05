@@ -13,7 +13,6 @@ public enum OAuthServiceError: Error {
 @AlbyActor
 public class OAuthService: NSObject {
     private let router = NetworkRouter<OAtuhAPI>(decoder: .albyDecoder)
-    private var codeVerifier: String?
     
     public override init() {
         super.init()
@@ -43,7 +42,7 @@ public class OAuthService: NSObject {
         guard let redirectURI = AlbyEnvironment.current.redirectURI else { throw OAuthServiceError.redirectURLNotSet }
         let urlPrefix = AlbyEnvironment.current.api == .prod ? "https://getalby.com" : "https://app.regtest.getalby.com"
         let codeVerifier = PKCECodeGenerator.generateCodeVerifier()
-        self.codeVerifier = codeVerifier
+        AlbyEnvironment.current.codeVerifier = codeVerifier
         let codeChallenge = try PKCECodeGenerator.generateCodeChallenge(from: codeVerifier)
         guard let url = URL(string: "\(urlPrefix)/oauth?client_id=\(clientID)&code_challenge=\(codeChallenge)&code_challenge_method=S256&response_type=code&redirect_uri=\(redirectURI)&scope=\(combineScopesString(scopes))") else { throw OAuthServiceError.badURL }
         return url
@@ -65,7 +64,7 @@ public class OAuthService: NSObject {
     
     /// Requests the OAuth token
     public func requestAccessToken(code: String) async throws -> Token {
-        guard let codeVerifier else { throw OAuthServiceError.codeVerifier }
+        guard let codeVerifier = AlbyEnvironment.current.codeVerifier else { throw OAuthServiceError.codeVerifier }
         guard let redirectURI = AlbyEnvironment.current.redirectURI else { throw OAuthServiceError.redirectURLNotSet }
         let token: Token = try await router.execute(.requestToken(code: code, codeVerifier: codeVerifier, redirectURI: redirectURI), shouldCheckToken: false)
         try storeTokenMetadata(for: token)
