@@ -40,6 +40,14 @@ public struct Invoice: AlbyCodable, Sendable {
     public let qrCodeSvg: String?
 }
 
+extension Invoice: Equatable {
+    public static func == (lhs: Invoice, rhs: Invoice) -> Bool {
+        lhs.paymentHash == rhs.paymentHash
+    }
+    
+    
+}
+
 public enum InvoiceState: String, AlbyCodable, Sendable {
     case created = "CREATED"
     case settled = "SETTLED"
