@@ -1,14 +1,14 @@
 
 public struct GeneratedInvoice: AlbyCodable, Sendable {
-    public let body: GeneratedInvoiceBody
+    public let invoice: GeneratedInvoiceBody
 }
 
 public struct GeneratedInvoiceBody: AlbyCodable, Sendable {
     public let pr: String
     public let routes: [String]
-    public let status: String
-    public let successAction: SuccessAction
-    public let verify: String
+    public let status: String?
+    public let successAction: SuccessAction?
+    public let verify: String?
 }
 
 public struct SuccessAction: AlbyCodable, Sendable {

@@ -1,7 +1,7 @@
 
 public struct Bolt11Payment: AlbyCodable, Equatable, Sendable {
     public let amount: Int
-    public let description: String
+    public let descriptionHash: String
     public let destination: String
     public let fee: Int
     public let paymentHash: String

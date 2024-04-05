@@ -57,7 +57,7 @@ extension LightningAddressDetailsProxyAPI: EndpointType {
                 return .requestParameters(encoding: .urlEncoding(parameters: ["ln" : lightningAddress]))
         case .requestInvoice(let lightningAddress, let amount, let comment):
             var parameters: Parameters = [:]
-            append(lightningAddress, toParameters: &parameters, withKey: "ln]")
+            append(lightningAddress, toParameters: &parameters, withKey: "ln")
             append(amount, toParameters: &parameters, withKey: "amount")
             append(comment, toParameters: &parameters, withKey: "comment")
             
