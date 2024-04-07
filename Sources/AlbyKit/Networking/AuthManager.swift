@@ -11,8 +11,14 @@ actor AuthManager {
         } else if await AlbyEnvironment.current.tokenRefreshRequired {
             try await refreshToken()
         } else if let token = Storage.retrieve(AlbyEnvironment.Constants.token, from: .documents, as: TokenMetadata.self) {
-            let tokenExpirationDate = token.createdAt.addingTimeInterval(TimeInterval(token.expiresIn))
-            let timeDiff = tokenExpirationDate.timeIntervalSince(token.createdAt)
+            
+            guard let createdAt = token.createdAt, let expiresIn = token.expiresIn else {
+                try await refreshToken()
+                return
+            }
+            
+            let tokenExpirationDate = createdAt.addingTimeInterval(TimeInterval(expiresIn))
+            let timeDiff = tokenExpirationDate.timeIntervalSince(createdAt)
             let fiveMinutesInSeconds: Double = 5 * 60
             
             if timeDiff <= fiveMinutesInSeconds {

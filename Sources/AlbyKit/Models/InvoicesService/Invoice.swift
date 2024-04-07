@@ -2,31 +2,31 @@ import Foundation
 
 // TODO: which properties are optional
 public struct Invoice: AlbyCodable, Sendable {
-    public let amount: Int
+    public let amount: Int?
     public let boostagram: Boostagram?
     public let comment: String?
-    public let createdAt: Date
-    public let creationDate: Date
-    public let currency: String
+    public let createdAt: Date?
+    public let creationDate: Date?
+    public let currency: String?
     public let customRecords: [String : String]?
     public let descriptionHash: String?
-    public let expiresAt: Date
-    public let expiry: Int
-    public let identifier: String
+    public let expiresAt: Date?
+    public let expiry: Int?
+    public let identifier: String?
     public let keysendMessage: String?
     public let memo: String?
     public let payerName: String?
     public let payerEmail: String?
     public let payerPubkey: String?
-    public let preimage: String
-    public let paymentHash: String
-    public let paymentRequest: String
-    public let rHashStr: String
+    public let preimage: String?
+    public let paymentHash: String?
+    public let paymentRequest: String?
+    public let rHashStr: String?
     public let settled: Bool?
     public let settledAt: Date?
-    public let state: InvoiceState
-    public let type: String
-    public let value: Int
+    public let state: InvoiceState?
+    public let type: String?
+    public let value: Int?
     
     // MARK: unsettled invoice properties
     public let fiatCurrency: String?
@@ -44,8 +44,6 @@ extension Invoice: Equatable {
     public static func == (lhs: Invoice, rhs: Invoice) -> Bool {
         lhs.paymentHash == rhs.paymentHash
     }
-    
-    
 }
 
 public enum InvoiceState: String, AlbyCodable, Sendable {
@@ -54,19 +52,19 @@ public enum InvoiceState: String, AlbyCodable, Sendable {
 }
 
 public struct Boostagram: AlbyCodable, Sendable {
-    public let action: String
-    public let appName: String
-    public let boostLink: String
-    public let episode: String
-    public let feedID: Int
-    public let itemID: Int
+    public let action: String?
+    public let appName: String?
+    public let boostLink: String?
+    public let episode: String?
+    public let feedID: Int?
+    public let itemID: Int?
     public let message: String?
-    public let name: String
-    public let podcast: String
-    public let senderId: String
-    public let senderName: String
-    public let time: String
-    public let ts: Int
-    public let url: String
-    public let valueMsatTotal: Int
+    public let name: String?
+    public let podcast: String?
+    public let senderId: String?
+    public let senderName: String?
+    public let time: String?
+    public let ts: Int?
+    public let url: String?
+    public let valueMsatTotal: Int?
 }
