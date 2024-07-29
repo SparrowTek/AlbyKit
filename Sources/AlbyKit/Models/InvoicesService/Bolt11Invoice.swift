@@ -18,7 +18,7 @@ public struct Bolt11Invoice: AlbyCodable, Sendable {
 public struct ParsedBolt11Invoice {
     var amount: UInt64?
     
-    init?(invoice: String) {
+    public init?(invoice: String) {
         amount = getSatsFromInvoice(bolt11: invoice)
     }
     
