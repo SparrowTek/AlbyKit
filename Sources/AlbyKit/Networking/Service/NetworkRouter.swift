@@ -62,9 +62,9 @@ internal class NetworkRouter<Endpoint: EndpointType>: NetworkRouterProtocol {
     /// - Returns: The generic type is returned
     func execute<T: Decodable>(_ route: Endpoint, attempts: Int = 1, shouldCheckToken: Bool = true) async throws -> T {
         
-        if shouldCheckToken {
-            try await checkToken()
-        }
+//        if shouldCheckToken {
+//            try await checkToken()
+//        }
         
         guard var request = try? await buildRequest(from: route) else { throw NetworkError.encodingFailed }
         await delegate?.intercept(&request)
