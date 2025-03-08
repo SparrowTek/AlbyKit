@@ -13,7 +13,7 @@ class AlbyEnvironment {
         static let token = "com.github.sparrowtek.albykit.filename.token"
     }
     
-    var api: API?
+    var api: API? = .prod
     var clientID: String?
     var clientSecret: String?
     var redirectURI: String?
